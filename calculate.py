@@ -16,7 +16,7 @@ class Calculator:
 		try:
 			ticker_file = open(file_name, 'r')
 		except:
-			print("invalid file name")
+			print("Invalid File Name")
 		
 		ticker_list = csv.reader(ticker_file)
 
@@ -26,10 +26,10 @@ class Calculator:
 			self.ticker_data[ticker[0]] = ticker_object
 			self.num_stocks += 1
 			if self.num_stocks % 100 == 0:
-				print('running stock #' , self.num_stocks)
+				print('Running stock #' , self.num_stocks)
 
 		ticker_file.close()
-		print('finished compiling a dict of size' , self.num_stocks)
+		print('Finished compiling a dict of size' , self.num_stocks)
 
 	# RETURNS:	the number of stocks that the calculator has stored
 	def get_num(self):
@@ -41,7 +41,8 @@ class Calculator:
 
 
 	def test(self, ticker):
-		return self.ticker_data[ticker].info['volume']		
+		return self.ticker_data[ticker].info
+		# return self.ticker_data[ticker].info['volume']
 
 	# REQUIRES: valid ticker name that was initialized in the calculator
 	#			and limit date (exclusive)
@@ -55,7 +56,7 @@ class Calculator:
 	# REQUIRES: valid ticker name that was initialized in the calculator
 	#			and limit date (exclusive)
 	# RETURNS:	the risk-free rate for the stock in the given time frame
-	def calculate_riskfree_rate(self, ticker_name, end_date):
+	def calculate_risk_free_rate(self, ticker_name, end_date):
 		return 0
 
 	# REQUIRES: valid ticker name that was initialized in the calculator
