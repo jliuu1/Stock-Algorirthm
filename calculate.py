@@ -58,7 +58,6 @@ class Calculator:
 	# REQUIRES: valid ticker name that was initialized in the calculator
 	#			and limit date (exclusive)
 	# RETURNS:	the return for the stock in the given time frame
-
 	def calculate_return(self, ticker_name, start_date, end_date):
 
 		start_price = self.ticker_data[ticker_name].history(start=start_date, end=self.day_after(start_date))['Close'].iloc[0]
@@ -67,7 +66,8 @@ class Calculator:
 		# print(start_price, end_price)
 		return_percentage = (end_price - start_price) / (start_price) * 100.0
 
-		return ticker_name + " had a " + str(round(return_percentage, 2)) + "% return"
+		# return ticker_name + " had a " + str(round(return_percentage, 2)) + "% return"
+		return return_percentage
 
 	# REQUIRES: valid ticker name that was initialized in the calculator
 	#			and limit date (exclusive)
