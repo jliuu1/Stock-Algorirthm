@@ -2,6 +2,7 @@ import csv
 import yfinance as yf
 import pandas as pd
 import numpy as np
+import datetime
 
 class Calculator:
 
@@ -35,24 +36,39 @@ class Calculator:
 	def get_num(self):
 		return self.num_stocks
 
-	# RETURNS:	the list of all the tickers
+	# RETURNS:	the list of all the tickers 
 	def get_names(self):
 		return self.ticker_names
 
 
 	def test(self, ticker):
-		return self.ticker_data[ticker].info
-		# return self.ticker_data[ticker].info['volume']
+		# return self.ticker_data[ticker].info
+		return self.ticker_data[ticker].history
+
+	def day_after(self, date_string):
+		temp = date_string.split('-')
+		curr_day = datetime.date(int(temp[0]), int(temp[1]), int(temp[2]))
+		# print(curr_day)
+		increment_day = datetime.timedelta(days=1)
+		next_day = curr_day + increment_day
+		# print(next_day)
+
+		return next_day
 
 	# REQUIRES: valid ticker name that was initialized in the calculator
 	#			and limit date (exclusive)
-	# RETURNS:	the expected return value for the stock in the given time frame
-	def caluclate_expected_return(self, ticker_name, end_date):
-		#history = self.ticker_data[ticker_name].history(period='max', interval='1wk')
-		#if history['date'] < end_date we're gonna have to implement a date comparison function
+	# RETURNS:	the return for the stock in the given time frame
 
-		return 0
-	
+	def calculate_return(self, ticker_name, start_date, end_date):
+
+		start_price = self.ticker_data[ticker_name].history(start=start_date, end=self.day_after(start_date))['Close'].iloc[0]
+		end_price = self.ticker_data[ticker_name].history(start=end_date, end=self.day_after(end_date))['Close'].iloc[0]
+
+		# print(start_price, end_price)
+		return_percentage = (end_price - start_price) / (start_price) * 100.0
+
+		return ticker_name + " had a " + str(round(return_percentage, 2)) + "% return"
+
 	# REQUIRES: valid ticker name that was initialized in the calculator
 	#			and limit date (exclusive)
 	# RETURNS:	the risk-free rate for the stock in the given time frame
