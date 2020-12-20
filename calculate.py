@@ -45,9 +45,18 @@ class Calculator:
 		# return self.ticker_data[ticker].info
 		return self.ticker_data[ticker].history
 
-	def day_after(self, date_string):
+	# REQUIRES: valid date string in the form YYYY-MM-DD
+	# RETURNS:	the datetime object for the given date
+	def get_date(self, date_string):
 		temp = date_string.split('-')
 		curr_day = datetime.date(int(temp[0]), int(temp[1]), int(temp[2]))
+
+		return curr_day
+
+	# REQUIRES: valid date string in the form YYYY-MM-DD
+	# RETURNS:	the datetime object for the next day
+	def day_after(self, date_string):
+		curr_day = self.get_date(date_string)
 		# print(curr_day)
 		increment_day = datetime.timedelta(days=1)
 		next_day = curr_day + increment_day
@@ -71,30 +80,77 @@ class Calculator:
 
 	# REQUIRES: valid ticker name that was initialized in the calculator
 	#			and limit date (exclusive)
-	# RETURNS:	the risk-free rate for the stock in the given time frame
-	def calculate_risk_free_rate(self, ticker_name, end_date):
-		return 0
+	# RETURNS:	the CAGR for the stock in the given time frame
+	def calculate_CAGR(self, ticker_name, start_date, end_date):
+		return_percentage = float(self.calculate_return(ticker_name, start_date, end_date))
+		d0 = self.get_date(start_date)
+		d1 = self.get_date(end_date)
+		delta = d1 - d0
+		year_frac = float(delta.days / 365.25)
+
+		cagr = ((return_percentage / 100) + 1) ** (1 / year_frac) - 1
+
+		return cagr
+
+	# REQUIRES: valid start and end dates in form YYYY-MM-DD
+	# RETURNS:	the sharpe ratio of a given stock prior to the end date
+	def risk_free_rate(self, start_date, end_date):
+		ten_year_treasury_bond = yf.Ticker("^TNX")
+		risk_free_rate = ten_year_treasury_bond.history(start=start_date, end=end_date)['Close'].mean()
+
+		return risk_free_rate
+
 
 	# REQUIRES: valid ticker name that was initialized in the calculator
 	#			and limit date (exclusive)
 	# RETURNS:	the sharpe ratio of a given stock prior to the end date
-	def calculate_sharpe_ratio(self, ticker_name, end_date):
-		'''
-		theres 2 ways to implement this function. either we generate 
-		the expected return and risk-free rate outside and average it
-		(which i, actually dont really agree with) or
-		we for loop through the dates of the stock in this function and
-		generate each value. this way its easier ot calculate standard
-		devation.
-		'''
-		return 0
+	def calculate_sharpe_ratio(self, ticker_name, start_date, end_date):
+		
+		price_history = self.ticker_data[ticker_name].history(start=start_date, end=end_date)['Close']
+		
+		returns = [0] * (price_history.size - 1)
+		for i in range(price_history.size - 1):
+			daily_return = (price_history.iloc[i + 1] - price_history.iloc[i]) / price_history.iloc[i] * 100
+			returns[i] = daily_return
+
+		pd_returns = pd.Series(returns)
+		return_percentage = self.calculate_return(ticker_name, start_date, end_date)
+		stdev = pd_returns.std()
+		volatility = stdev * np.sqrt(price_history.size)
+		rfr = self.risk_free_rate(start_date, end_date)
+
+		print(return_percentage)
+		print(stdev)
+		print(volatility)
+		
+		sharpe_ratio = (return_percentage - rfr) / volatility
+		
+		return sharpe_ratio
 
 	# REQUIRES: valid ticker name that was initialized in the calculator
 	#			and limit date (exclusive)
 	# RETURNS:	the sortino ratio of a given stock prior to the end date
-	def calculate_sortino_ratio(self, ticker_name):
-		'''
-		same debate as above but i thikn the forloop method will be
-		easier to calculate standard devation of downside
-		'''
+	def calculate_sortino_ratio(self, ticker_name, start_date, end_date):
+		
+		price_history = self.ticker_data[ticker_name].history(start=start_date, end=end_date)['Close']
+		
+		returns = [None] * (price_history.size - 1)
+		for i in range(price_history.size - 1):
+			daily_return = (price_history.iloc[i + 1] - price_history.iloc[i]) / price_history.iloc[i] * 100
+			if daily_return < 0:
+				returns[i] = daily_return
+
+		pd_returns = pd.Series(returns)
+		return_percentage = self.calculate_return(ticker_name, start_date, end_date)
+		stdev = pd_returns.std()
+		volatility = stdev * np.sqrt(price_history.size)
+		rfr = self.risk_free_rate(start_date, end_date)
+
+		print(return_percentage)
+		print(stdev)
+		print(volatility)
+		
+		sharpe_ratio = (return_percentage - rfr) / volatility
+		
+		return sharpe_ratio
 		return 0
