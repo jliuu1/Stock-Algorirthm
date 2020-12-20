@@ -156,3 +156,19 @@ class Calculator:
 		
 		return sharpe_ratio
 		return 0
+
+	def calculate_data_for_timeframe(self, start_date, end_date):
+		
+		with open("data_for_timeframe.csv", "w") as data_file:
+			writer = csv.writer(data_file)
+			writer.writerow(['Ticker', 'Sharpe', 'Sortino', 'CAGR'])
+			
+			for ticker_name in self.ticker_names:
+				try:
+					ticker_sharpe = self.calculate_sharpe_ratio(ticker_name, start_date, end_date)
+					ticker_sortino = self.calculate_sortino_ratio(ticker_name, start_date, end_date)
+					ticker_CAGR = self.calculate_CAGR(ticker_name, start_date, end_date)
+				except:
+					continue
+				writer.writerow([ticker_name, ticker_sharpe, ticker_sortino, ticker_CAGR])
+
