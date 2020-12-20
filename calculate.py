@@ -119,9 +119,9 @@ class Calculator:
 		volatility = stdev * np.sqrt(price_history.size)
 		rfr = self.risk_free_rate(start_date, end_date)
 
-		print(return_percentage)
-		print(stdev)
-		print(volatility)
+		# print(return_percentage)
+		# print(stdev)
+		# print(volatility)
 		
 		sharpe_ratio = (return_percentage - rfr) / volatility
 		
@@ -134,21 +134,23 @@ class Calculator:
 		
 		price_history = self.ticker_data[ticker_name].history(start=start_date, end=end_date)['Close']
 		
+		negative_count = 0
 		returns = [None] * (price_history.size - 1)
 		for i in range(price_history.size - 1):
 			daily_return = (price_history.iloc[i + 1] - price_history.iloc[i]) / price_history.iloc[i] * 100
 			if daily_return < 0:
 				returns[i] = daily_return
+				negative_count += 1
 
 		pd_returns = pd.Series(returns)
 		return_percentage = self.calculate_return(ticker_name, start_date, end_date)
 		stdev = pd_returns.std()
-		volatility = stdev * np.sqrt(price_history.size)
+		volatility = stdev * np.sqrt(negative_count)
 		rfr = self.risk_free_rate(start_date, end_date)
 
-		print(return_percentage)
-		print(stdev)
-		print(volatility)
+		# print(return_percentage)
+		# print(stdev)
+		# print(volatility)
 		
 		sharpe_ratio = (return_percentage - rfr) / volatility
 		
