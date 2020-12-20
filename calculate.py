@@ -3,12 +3,12 @@ import yfinance as yf
 import pandas as pd
 import numpy as np
 import datetime
-
+ 
 class Calculator:
-
-	# REQUIRES:	a file that exists
-	# EFFECTS: 	generates instance variabes that can be later used
-	#			for calculations 
+ 
+	# REQUIRES: a file that exists
+	# EFFECTS:  generates instance variabes that can be later used
+	#           for calculations
 	def __init__(self, file_name):
 		self.ticker_names = []
 		self.ticker_data = {}
@@ -18,7 +18,7 @@ class Calculator:
 			ticker_file = open(file_name, 'r')
 		except:
 			print("Invalid File Name")
-		
+
 		ticker_list = csv.reader(ticker_file)
 
 		for ticker in ticker_list:
@@ -26,35 +26,54 @@ class Calculator:
 			ticker_object = yf.Ticker(ticker[0])
 			self.ticker_data[ticker[0]] = ticker_object
 			self.num_stocks += 1
-			if self.num_stocks % 100 == 0:
-				print('Running stock #' , self.num_stocks)
+		if self.num_stocks % 100 == 0:
+			print('Running stock #' , self.num_stocks)
 
 		ticker_file.close()
 		print('Finished compiling a dict of size' , self.num_stocks)
 
-	# RETURNS:	the number of stocks that the calculator has stored
+	# RETURNS:  the number of stocks that the calculator has stored
 	def get_num(self):
 		return self.num_stocks
 
-	# RETURNS:	the list of all the tickers 
+	# RETURNS:  the list of all the tickers
 	def get_names(self):
 		return self.ticker_names
 
 
 	def test(self, ticker):
-		# return self.ticker_data[ticker].info
+	# return self.ticker_data[ticker].info
 		return self.ticker_data[ticker].history
 
 	# REQUIRES: valid date string in the form YYYY-MM-DD
-	# RETURNS:	the datetime object for the given date
+	# RETURNS:  the datetime object for the given date
 	def get_date(self, date_string):
 		temp = date_string.split('-')
 		curr_day = datetime.date(int(temp[0]), int(temp[1]), int(temp[2]))
 
 		return curr_day
+	
+	# REQUIRES: valid date object
+	# RETURNS:  string for the date
+	def date_to_string(self, date):
+		return date.strftime("%Y" + "-" + "%m" + "-" + "%d")
 
 	# REQUIRES: valid date string in the form YYYY-MM-DD
-	# RETURNS:	the datetime object for the next day
+	# RETURNS:  the datetime object for the next market day
+	def next_market_day(self, date_string):
+		d0 = self.get_date(date_string)
+		increment_day = datetime.timedelta(days=1)
+		
+		while (d0.weekday() == 5 or d0.weekday() == 6):
+			d0 += increment_day
+
+		# ACCOUNT FOR HOLIDAYS
+		
+		return self.date_to_string(d0)
+
+
+	# REQUIRES: valid date string in the form YYYY-MM-DD
+	# RETURNS:  the datetime object for the next day
 	def day_after(self, date_string):
 		curr_day = self.get_date(date_string)
 		# print(curr_day)
@@ -62,15 +81,34 @@ class Calculator:
 		next_day = curr_day + increment_day
 		# print(next_day)
 
-		return next_day
+		return self.next_market_day(self.date_to_string(next_day))
+
+	# REQUIRES: 2 valid date strings in the form YYYY-MM-DD
+	# RETURNS:  the date string of the period of the same length after end_date
+
+	def next_per_end(self, start_date, end_date):
+		d0 = self.get_date(start_date)
+		d1 = self.get_date(end_date)
+		difference = d1 - d0
+		increment_day = datetime.timedelta(days=1)
+		today = datetime.date.today()
+
+		if (d1 + difference + increment_day) >= today:
+			next_date = today - increment_day
+			while (next_date.weekday() == 5 or next_date.weekday() == 6):
+				next_date -= increment_day
+		else:
+			next_date = d1 + difference
+
+		return self.next_market_day(self.date_to_string(next_date))
 
 	# REQUIRES: valid ticker name that was initialized in the calculator
-	#			and limit date (exclusive)
-	# RETURNS:	the return for the stock in the given time frame
+	#           and limit date (exclusive)
+	# RETURNS:  the return for the stock in the given time frame
 	def calculate_return(self, ticker_name, start_date, end_date):
 
-		start_price = self.ticker_data[ticker_name].history(start=start_date, end=self.day_after(start_date))['Close'].iloc[0]
-		end_price = self.ticker_data[ticker_name].history(start=end_date, end=self.day_after(end_date))['Close'].iloc[0]
+		start_price = self.ticker_data[ticker_name].history(start=self.next_market_day(start_date), end=self.day_after(start_date))['Close'].iloc[0]
+		end_price = self.ticker_data[ticker_name].history(start=self.next_market_day(end_date), end=self.day_after(end_date))['Close'].iloc[0]
 
 		# print(start_price, end_price)
 		return_percentage = (end_price - start_price) / (start_price) * 100.0
@@ -79,9 +117,9 @@ class Calculator:
 		return return_percentage
 
 	# REQUIRES: valid ticker name that was initialized in the calculator
-	#			and limit date (exclusive)
-	# RETURNS:	the CAGR for the stock in the given time frame
-	def calculate_CAGR(self, ticker_name, start_date, end_date):
+	#           and limit date (exclusive)
+	# RETURNS:  the CAGR for the stock in the given time frame
+	def calculate_curr_per_CAGR(self, ticker_name, start_date, end_date):
 		return_percentage = float(self.calculate_return(ticker_name, start_date, end_date))
 		d0 = self.get_date(start_date)
 		d1 = self.get_date(end_date)
@@ -92,22 +130,37 @@ class Calculator:
 
 		return cagr
 
+	# REQUIRES: valid ticker name that was initialized in the calculator
+	#           and limit date (exclusive)
+	# RETURNS:  the CAGR for the stock in the time frame after the given time frame
+	def calculate_next_per_CAGR(self, ticker_name, start_date, end_date):
+		next_per_end = self.next_per_end(start_date, end_date)
+		return_percentage = float(self.calculate_return(ticker_name, self.next_market_day(end_date), next_per_end))
+
+		next_period_len = self.get_date(next_per_end) - self.get_date(end_date)
+		year_frac = float(next_period_len.days / 365.25)
+
+		next_cagr = ((return_percentage / 100) + 1) ** (1 / year_frac) - 1
+
+		return next_cagr
+
+
 	# REQUIRES: valid start and end dates in form YYYY-MM-DD
-	# RETURNS:	the sharpe ratio of a given stock prior to the end date
+	# RETURNS:  the sharpe ratio of a given stock prior to the end date
 	def risk_free_rate(self, start_date, end_date):
 		ten_year_treasury_bond = yf.Ticker("^TNX")
-		risk_free_rate = ten_year_treasury_bond.history(start=start_date, end=end_date)['Close'].mean()
+		risk_free_rate = ten_year_treasury_bond.history(start=self.next_market_day(start_date), end=self.next_market_day(end_date))['Close'].mean()
 
 		return risk_free_rate
 
 
 	# REQUIRES: valid ticker name that was initialized in the calculator
-	#			and limit date (exclusive)
-	# RETURNS:	the sharpe ratio of a given stock prior to the end date
+	#           and limit date (exclusive)
+	# RETURNS:  the sharpe ratio of a given stock prior to the end date
 	def calculate_sharpe_ratio(self, ticker_name, start_date, end_date):
-		
-		price_history = self.ticker_data[ticker_name].history(start=start_date, end=end_date)['Close']
-		
+
+		price_history = self.ticker_data[ticker_name].history(start=self.next_market_day(start_date), end=self.next_market_day(end_date))['Close']
+
 		returns = [0] * (price_history.size - 1)
 		for i in range(price_history.size - 1):
 			daily_return = (price_history.iloc[i + 1] - price_history.iloc[i]) / price_history.iloc[i] * 100
@@ -122,18 +175,18 @@ class Calculator:
 		# print(return_percentage)
 		# print(stdev)
 		# print(volatility)
-		
+
 		sharpe_ratio = (return_percentage - rfr) / volatility
-		
+
 		return sharpe_ratio
 
 	# REQUIRES: valid ticker name that was initialized in the calculator
-	#			and limit date (exclusive)
-	# RETURNS:	the sortino ratio of a given stock prior to the end date
+	#           and limit date (exclusive)
+	# RETURNS:  the sortino ratio of a given stock prior to the end date
 	def calculate_sortino_ratio(self, ticker_name, start_date, end_date):
-		
-		price_history = self.ticker_data[ticker_name].history(start=start_date, end=end_date)['Close']
-		
+
+		price_history = self.ticker_data[ticker_name].history(start=self.next_market_day(start_date), end=self.next_market_day(end_date))['Close']
+
 		negative_count = 0
 		returns = [None] * (price_history.size - 1)
 		for i in range(price_history.size - 1):
@@ -151,24 +204,43 @@ class Calculator:
 		# print(return_percentage)
 		# print(stdev)
 		# print(volatility)
-		
-		sharpe_ratio = (return_percentage - rfr) / volatility
-		
-		return sharpe_ratio
-		return 0
+
+		sortino_ratio = (return_percentage - rfr) / volatility
+
+		return sortino_ratio
 
 	def calculate_data_for_timeframe(self, start_date, end_date):
-		
-		with open("data_for_timeframe.csv", "w") as data_file:
+
+		# with open("practice_data.csv", "w") as data_file:
+		# 	writer = csv.writer(data_file)
+		# 	writer.writerow(['Ticker', 'Sharpe', 'Sortino', 'Current CAGR'])
+
+		# 	for ticker_name in self.ticker_names:
+		# 		try:
+		# 			ticker_sharpe = self.calculate_sharpe_ratio(ticker_name, start_date, end_date)
+		# 			ticker_sortino = self.calculate_sortino_ratio(ticker_name, start_date, end_date)
+		# 			ticker_curr_CAGR = self.calculate_curr_per_CAGR(ticker_name, start_date, end_date)
+		# 			# ticker_next_CAGR = self.calculate_next_per_CAGR(ticker_name, start_date, end_date)
+		# 		except:
+		# 			continue
+
+		# 		writer.writerow([ticker_name, ticker_sharpe, ticker_sortino, ticker_curr_CAGR])
+
+		with open("practice_data.csv", "w") as data_file:
 			writer = csv.writer(data_file)
-			writer.writerow(['Ticker', 'Sharpe', 'Sortino', 'CAGR'])
-			
+			writer.writerow(['Ticker', 'Sharpe', 'Sortino', 'Current CAGR', 'Next CAGR'] )
+
 			for ticker_name in self.ticker_names:
 				try:
 					ticker_sharpe = self.calculate_sharpe_ratio(ticker_name, start_date, end_date)
 					ticker_sortino = self.calculate_sortino_ratio(ticker_name, start_date, end_date)
-					ticker_CAGR = self.calculate_CAGR(ticker_name, start_date, end_date)
+					ticker_curr_CAGR = self.calculate_curr_per_CAGR(ticker_name, start_date, end_date)
+					ticker_next_CAGR = self.calculate_next_per_CAGR(ticker_name, start_date, end_date)
 				except:
 					continue
-				writer.writerow([ticker_name, ticker_sharpe, ticker_sortino, ticker_CAGR])
+
+				writer.writerow([ticker_name, ticker_sharpe, ticker_sortino, ticker_curr_CAGR, ticker_next_CAGR])
+
+ 
+
 
