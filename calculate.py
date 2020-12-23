@@ -30,8 +30,19 @@ class Calculator:
 		if self.num_stocks % 100 == 0:
 			print('Running stock #' , self.num_stocks)
 
+		self.find_ticker_start()
+
 		ticker_file.close()
 		print('Finished compiling a dict of size' , self.num_stocks)
+
+	# REQUIRES: 
+	# MODIFIES: Class attribute ticker_times, filling the dict values with the first recorded data in YFinance for the stock
+	# RETURNS:
+	def find_ticker_start(self):
+		for ticker in self.ticker_names:
+			ticker_history = self.ticker_data[ticker].history(period='max')
+			start_date = pd.to_datetime(ticker_history.index[0])
+			self.ticker_starts[ticker] = self.date_to_string(start_date)
 
 	# RETURNS:  the number of stocks that the calculator has stored
 	def get_num(self):
@@ -40,6 +51,10 @@ class Calculator:
 	# RETURNS:  the list of all the tickers
 	def get_names(self):
 		return self.ticker_names
+	
+	# RETURNS: 	the dict of all tickers and their start dates
+	def get_ticker_starts(self):
+		return self.ticker_starts
 
 
 	def test(self, ticker):
@@ -232,23 +247,10 @@ class Calculator:
 		return sortino_ratio
 
 	# REQUIRES: 2 valid dates as strings in the format YYYY-MM-DD
-	# RETURNS:  A csv of the data for the stocks in that time frame
-	def calculate_data_for_timeframe(self, start_date, end_date):
+	# RETURNS:  A csv of the data for all stocks in that time frame
+	def calculate_all_data_for_timeframe(self, start_date, end_date):
 
-		# with open("practice_data.csv", "w") as data_file:
-		# 	writer = csv.writer(data_file)
-		# 	writer.writerow(['Ticker', 'Sharpe', 'Sortino', 'Current CAGR'])
-
-		# 	for ticker_name in self.ticker_names:
-		# 		try:
-		# 			ticker_sharpe = self.calculate_sharpe_ratio(ticker_name, start_date, end_date)
-		# 			ticker_sortino = self.calculate_sortino_ratio(ticker_name, start_date, end_date)
-		# 			ticker_curr_CAGR = self.calculate_curr_per_CAGR(ticker_name, start_date, end_date)
-		# 		except:
-		# 			continue
-
-		# 		writer.writerow([ticker_name, ticker_sharpe, ticker_sortino, ticker_curr_CAGR])
-
+		# Calculates data for all tickers
 		with open("practice_data.csv", "w") as data_file:
 			writer = csv.writer(data_file)
 			writer.writerow(['Ticker', 'Sharpe', 'Sortino', 'Current Period CAGR', 'Next Year CAGR'] )
@@ -265,16 +267,23 @@ class Calculator:
 
 				writer.writerow([ticker_name, ticker_sharpe, ticker_sortino, ticker_curr_CAGR, ticker_next_year_CAGR])
 
-	# REQUIRES: 
-	# MODIFIES: Class attribute ticker_times, filling the dict values with the first recorded data in YFinance for the stock
-	# RETURNS:
-	def find_ticker_start(self):
-		for ticker in self.ticker_names:
-			ticker_history = self.ticker_data[ticker].history(period='max')
-			start_date = pd.to_datetime(ticker_history.index[0])
-			self.ticker_starts[ticker] = self.date_to_string(start_date)
+	# REQUIRES: 2 valid dates as strings in the format YYYY-MM-DD
+	# RETURNS:  A csv of the data for all stocks in that time frame
+	def calculate_ticker_data_for_timeframe(self, ticker_name, start_date, end_date):
 
-		print(self.ticker_starts)
+		# Calculates data for a specific ticker
+		with open("practice_data.csv", "w") as data_file:
+			writer = csv.writer(data_file)
+
+			ticker_sharpe = self.calculate_sharpe_ratio(ticker_name, start_date, end_date)
+			ticker_sortino = self.calculate_sortino_ratio(ticker_name, start_date, end_date)
+			ticker_curr_CAGR = self.calculate_curr_per_CAGR(ticker_name, start_date, end_date)
+			# ticker_next_mirror_CAGR = self.calculate_next_mirror_per_CAGR(ticker_name, start_date, end_date)
+			ticker_next_year_CAGR = self.calculate_next_given_per_CAGR(ticker_name, end_date, 365)
+
+			writer.writerow([ticker_name, ticker_sharpe, ticker_sortino, ticker_curr_CAGR, ticker_next_year_CAGR])
+
+
 
  
 
