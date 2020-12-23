@@ -12,6 +12,7 @@ class Calculator:
 	def __init__(self, file_name):
 		self.ticker_names = []
 		self.ticker_data = {}
+		self.ticker_starts = {}
 		self.num_stocks = 0
 
 		try:
@@ -58,6 +59,11 @@ class Calculator:
 	def date_to_string(self, date):
 		return date.strftime("%Y" + "-" + "%m" + "-" + "%d")
 
+	# REQUIRES: number of days as int
+	# RETURNS:  timedelta object for number of days
+	def get_time_delta(self, num_days):
+		return datetime.timedelta(days = num_days)
+
 	# REQUIRES: valid date string in the form YYYY-MM-DD
 	# RETURNS:  the datetime object for the next market day
 	def next_market_day(self, date_string):
@@ -85,7 +91,6 @@ class Calculator:
 
 	# REQUIRES: 2 valid date strings in the form YYYY-MM-DD
 	# RETURNS:  the date string of the period of the same length after end_date
-
 	def next_per_end(self, start_date, end_date):
 		d0 = self.get_date(start_date)
 		d1 = self.get_date(end_date)
@@ -110,10 +115,8 @@ class Calculator:
 		start_price = self.ticker_data[ticker_name].history(start=self.next_market_day(start_date), end=self.day_after(start_date))['Close'].iloc[0]
 		end_price = self.ticker_data[ticker_name].history(start=self.next_market_day(end_date), end=self.day_after(end_date))['Close'].iloc[0]
 
-		# print(start_price, end_price)
 		return_percentage = (end_price - start_price) / (start_price) * 100.0
 
-		# return ticker_name + " had a " + str(round(return_percentage, 2)) + "% return"
 		return return_percentage
 
 	# REQUIRES: valid ticker name that was initialized in the calculator
@@ -132,17 +135,40 @@ class Calculator:
 
 	# REQUIRES: valid ticker name that was initialized in the calculator
 	#           and limit date (exclusive)
-	# RETURNS:  the CAGR for the stock in the time frame after the given time frame
-	def calculate_next_per_CAGR(self, ticker_name, start_date, end_date):
+	# RETURNS:  the CAGR for the stock in the time frame after the same time frame
+	def calculate_next_mirror_per_CAGR(self, ticker_name, start_date, end_date):
 		next_per_end = self.next_per_end(start_date, end_date)
 		return_percentage = float(self.calculate_return(ticker_name, self.next_market_day(end_date), next_per_end))
 
 		next_period_len = self.get_date(next_per_end) - self.get_date(end_date)
 		year_frac = float(next_period_len.days / 365.25)
 
-		next_cagr = ((return_percentage / 100) + 1) ** (1 / year_frac) - 1
+		next_mirror_per_cagr = ((return_percentage / 100) + 1) ** (1 / year_frac) - 1
 
-		return next_cagr
+		return next_mirror_per_cagr
+
+	# REQUIRES: valid ticker name that was initialized in the calculator
+	#           and limit date (exclusive)
+	# RETURNS:  the CAGR for the stock in the time frame after the given time frame
+	def calculate_next_given_per_CAGR(self, ticker_name, start_date, num_days):
+		delta = self.get_time_delta(num_days)
+		increment_day = datetime.timedelta(days=1)
+		d1 = self.get_date(start_date)
+		today = datetime.date.today()
+
+		if (d1 + delta + increment_day) >= today:
+			next_date = today - increment_day
+			while (next_date.weekday() == 5 or next_date.weekday() == 6):
+				next_date -= increment_day
+		else:
+			next_date = d1 + delta
+		end_date = self.next_market_day(self.date_to_string(next_date))
+
+		return_percentage = float(self.calculate_return(ticker_name, self.next_market_day(start_date), end_date))
+		year_frac = float(num_days / 365.25)
+		next_given_per_cagr = ((return_percentage / 100) + 1) ** (1 / year_frac) - 1
+
+		return next_given_per_cagr
 
 
 	# REQUIRES: valid start and end dates in form YYYY-MM-DD
@@ -201,14 +227,12 @@ class Calculator:
 		volatility = stdev * np.sqrt(negative_count)
 		rfr = self.risk_free_rate(start_date, end_date)
 
-		# print(return_percentage)
-		# print(stdev)
-		# print(volatility)
-
 		sortino_ratio = (return_percentage - rfr) / volatility
 
 		return sortino_ratio
 
+	# REQUIRES: 2 valid dates as strings in the format YYYY-MM-DD
+	# RETURNS:  A csv of the data for the stocks in that time frame
 	def calculate_data_for_timeframe(self, start_date, end_date):
 
 		# with open("practice_data.csv", "w") as data_file:
@@ -220,7 +244,6 @@ class Calculator:
 		# 			ticker_sharpe = self.calculate_sharpe_ratio(ticker_name, start_date, end_date)
 		# 			ticker_sortino = self.calculate_sortino_ratio(ticker_name, start_date, end_date)
 		# 			ticker_curr_CAGR = self.calculate_curr_per_CAGR(ticker_name, start_date, end_date)
-		# 			# ticker_next_CAGR = self.calculate_next_per_CAGR(ticker_name, start_date, end_date)
 		# 		except:
 		# 			continue
 
@@ -228,18 +251,30 @@ class Calculator:
 
 		with open("practice_data.csv", "w") as data_file:
 			writer = csv.writer(data_file)
-			writer.writerow(['Ticker', 'Sharpe', 'Sortino', 'Current CAGR', 'Next CAGR'] )
+			writer.writerow(['Ticker', 'Sharpe', 'Sortino', 'Current Period CAGR', 'Next Year CAGR'] )
 
 			for ticker_name in self.ticker_names:
 				try:
 					ticker_sharpe = self.calculate_sharpe_ratio(ticker_name, start_date, end_date)
 					ticker_sortino = self.calculate_sortino_ratio(ticker_name, start_date, end_date)
 					ticker_curr_CAGR = self.calculate_curr_per_CAGR(ticker_name, start_date, end_date)
-					ticker_next_CAGR = self.calculate_next_per_CAGR(ticker_name, start_date, end_date)
+					# ticker_next_mirror_CAGR = self.calculate_next_mirror_per_CAGR(ticker_name, start_date, end_date)
+					ticker_next_year_CAGR = self.calculate_next_given_per_CAGR(ticker_name, end_date, 365)
 				except:
 					continue
 
-				writer.writerow([ticker_name, ticker_sharpe, ticker_sortino, ticker_curr_CAGR, ticker_next_CAGR])
+				writer.writerow([ticker_name, ticker_sharpe, ticker_sortino, ticker_curr_CAGR, ticker_next_year_CAGR])
+
+	# REQUIRES: 
+	# MODIFIES: Class attribute ticker_times, filling the dict values with the first recorded data in YFinance for the stock
+	# RETURNS:
+	def find_ticker_start(self):
+		for ticker in self.ticker_names:
+			ticker_history = self.ticker_data[ticker].history(period='max')
+			start_date = pd.to_datetime(ticker_history.index[0])
+			self.ticker_starts[ticker] = self.date_to_string(start_date)
+
+		print(self.ticker_starts)
 
  
 
