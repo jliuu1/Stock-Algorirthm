@@ -23,7 +23,7 @@ with open("practice_data.csv", "w") as data_file:
         ticker = calc.ticker_names[i]
         first_listing = calc.ticker_starts[ticker]
 
-        for i in range(14):
+        for i in range(2020 - year - segment - 1):
             start_date = str(year + i) + "-" + month + "-" + day
             end_date = str(year + i + 5) + "-" + month + "-" + day
 
