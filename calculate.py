@@ -3,6 +3,7 @@ import yfinance as yf
 import pandas as pd
 import numpy as np
 import datetime
+import calendar
  
 class Calculator:
  
@@ -72,7 +73,7 @@ class Calculator:
 	# REQUIRES: valid date object
 	# RETURNS:  string for the date
 	def date_to_string(self, date):
-		return date.strftime("%Y" + "-" + "%m" + "-" + "%d")
+		return date.strftime("%Y-%m-%d")
 
 	# REQUIRES: number of days as int
 	# RETURNS:  timedelta object for number of days
@@ -104,6 +105,11 @@ class Calculator:
 
 		return self.next_market_day(self.date_to_string(next_day))
 
+	def month_after(self, date_string):
+		date = datetime.datetime.strptime(date_string, "%Y-%m-%d")
+		date += datetime.timedelta(days=calendar.monthrange(date.year,date.month)[1])
+		return self.next_market_day(self.date_to_string(date))
+
 	# REQUIRES: 2 valid date strings in the form YYYY-MM-DD
 	# RETURNS:  the date string of the period of the same length after end_date
 	def next_per_end(self, start_date, end_date):
@@ -121,6 +127,7 @@ class Calculator:
 			next_date = d1 + difference
 
 		return self.next_market_day(self.date_to_string(next_date))
+
 
 	# REQUIRES: valid ticker name that was initialized in the calculator
 	#           and limit date (exclusive)
@@ -213,9 +220,9 @@ class Calculator:
 		volatility = stdev * np.sqrt(price_history.size)
 		rfr = self.risk_free_rate(start_date, end_date)
 
-		# print(return_percentage)
-		# print(stdev)
-		# print(volatility)
+		print(return_percentage)
+		print(stdev)
+		print(volatility)
 
 		sharpe_ratio = (return_percentage - rfr) / volatility
 
@@ -267,29 +274,52 @@ class Calculator:
 
 				writer.writerow([ticker_name, ticker_sharpe, ticker_sortino, ticker_curr_CAGR, ticker_next_year_CAGR])
 
+	def num_months(self, start_date_string, end_date_string):
+		return int((self.get_date(end_date_string) - self.get_date(start_date_string)).days / 30.4)
+
+		
 	# REQUIRES: 2 valid dates as strings in the format YYYY-MM-DD
 	# RETURNS:  A csv of the data for all stocks in that time frame
 	def calculate_ticker_data_for_timeframe(self, csv_writer, ticker_name, start_date, end_date):
 
-		# Calculates data for a specific ticker
-		# with open("practice_data.csv", "w") as data_file:
-		# 	writer = csv.writer(data_file)
+		num_months = self.num_months(start_date, end_date)
 
-		# 	ticker_sharpe = self.calculate_sharpe_ratio(ticker_name, start_date, end_date)
-		# 	ticker_sortino = self.calculate_sortino_ratio(ticker_name, start_date, end_date)
-		# 	ticker_curr_CAGR = self.calculate_curr_per_CAGR(ticker_name, start_date, end_date)
-		# 	# ticker_next_mirror_CAGR = self.calculate_next_mirror_per_CAGR(ticker_name, start_date, end_date)
-		# 	ticker_next_year_CAGR = self.calculate_next_given_per_CAGR(ticker_name, end_date, 365)
+		sharpe_values = []
+		sortino_values = []
+		CAGR_values = []
+		date_iterator_start = self.get_date(start_date)
+		date_iterator_end = self.get_date(self.month_after(start_date))
+		month = 0
 
-		# 	writer.writerow([ticker_name, ticker_sharpe, ticker_sortino, ticker_curr_CAGR, ticker_next_year_CAGR])
+		#NEED TO DEAL WITH CASE WHERE IF date_iterator_start + num_months == 0, dont run that trial.
+		#ALSO NEED TO DEAL WITH THE CASE IF WE HAVE PARTIAL DATA TO FILL WITH ZEROS
 
-		ticker_sharpe = self.calculate_sharpe_ratio(ticker_name, start_date, end_date)
-		ticker_sortino = self.calculate_sortino_ratio(ticker_name, start_date, end_date)
-		ticker_curr_CAGR = self.calculate_curr_per_CAGR(ticker_name, start_date, end_date)
-		# ticker_next_mirror_CAGR = self.calculate_next_mirror_per_CAGR(ticker_name, start_date, end_date)
-		ticker_next_year_CAGR = self.calculate_next_given_per_CAGR(ticker_name, end_date, 365)
+		while month != num_months:
+			try:
+				sharpe_values.append(self.calculate_sharpe_ratio(ticker_name, date_iterator_start, date_iterator_end))
+				sortino_values.append(self.calculate_sortino_ratio(ticker_name, date_iterator_start, date_iterator_end))
+				CAGR_values.append(self.calculate_curr_per_CAGR(ticker_name, date_iterator_start, date_iterator_end))
+				# ticker_next_mirror_CAGR = self.calculate_next_mirror_per_CAGR(ticker_name, date_iterator_start, date_iterator_end)
+			except:
+				sharpe_values.append(0)
+				sortino_values.append(0)
+				CAGR_values.append(0)
+			
+			date_iterator_start = self.get_date(self.month_after(self.date_to_string(date_iterator_start)))
+			date_iterator_end = self.get_date(self.month_after(self.date_to_string(date_iterator_end)))
+			month += 1
 
-		csv_writer.writerow([ticker_name, ticker_sharpe, ticker_sortino, ticker_curr_CAGR, ticker_next_year_CAGR])
+		try:
+			ticker_next_year_CAGR = self.calculate_next_given_per_CAGR(ticker_name, end_date, 365)
+		except:
+			ticker_next_year_CAGR = 0
+
+		csv_writer.writerow([ticker_name, ticker_next_year_CAGR, start_date, end_date])
+		csv_writer.writerow(sharpe_values)
+		csv_writer.writerow(sortino_values)
+		csv_writer.writerow(CAGR_values)
+			
+			
 
 
 
