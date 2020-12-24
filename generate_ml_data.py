@@ -1,5 +1,3 @@
-import csv
-import yfinance as yf
 from calculate import Calculator
 
 temp1 = open('stock_tickers.csv', 'r')

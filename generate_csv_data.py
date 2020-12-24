@@ -11,7 +11,8 @@ calc = Calculator('stock_tickers.csv')
 year = 2000
 segment = 5
 month = '01'
-day = '02'       # 01 is New Year's Day, market's aren't open
+day = '02'                                                  # 01 is New Year's Day, market's aren't open
+one_thousand_days = datetime.timedelta(days = 1000)         
 
 with open("practice_data.csv", "w") as data_file:
 	
@@ -22,15 +23,13 @@ with open("practice_data.csv", "w") as data_file:
         ticker = calc.ticker_names[i]
         first_listing = calc.ticker_starts[ticker]
 
-        for i in range(2020 - year - segment - 1):
+        for i in range(14):
             start_date = str(year + i) + "-" + month + "-" + day
             end_date = str(year + i + 5) + "-" + month + "-" + day
 
-            #if first_listing < end_date:
-                #try:
-            calc.calculate_ticker_data_for_timeframe(writer, ticker, start_date, end_date)
-                #except:
-                    #continue
+            # no point for the data if more than 1000 entries are zeros
+            if (calc.get_date(start_date) + one_thousand_days) > calc.get_date(first_listing):              
+                calc.calculate_ticker_data_for_timeframe(writer, ticker, start_date, end_date)
 
 
 print(time.time() - start_time, "seconds to generate data for", calc.get_num(), "stocks")

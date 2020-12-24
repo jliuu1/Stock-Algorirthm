@@ -26,9 +26,11 @@ calc = Calculator('stock_tickers.csv')
 # print("Generating Data: ")
 # calc.calculate_all_data_for_timeframe('2019-08-14', '2020-01-07')
 
+# start_date = calc.get_date('2019-01-01')
+# print(calc.calculate_sharpe_ratio('GVA', start_date, '2020-01-01'))
+
 with open("practice_data.csv", "w") as data_file:
     writer = csv.writer(data_file)
-    calc.calculate_ticker_data_for_timeframe(writer,'LX','2019-01-01', '2020-01-01')   
-    calc.calculate_ticker_data_for_timeframe(writer,'WHG','2019-08-14', '2020-01-07')
+    calc.calculate_ticker_data_for_timeframe(writer,'GVA','2019-01-01', '2020-01-01')   
 
 # print(calc.get_ticker_starts())
