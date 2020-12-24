@@ -32,12 +32,12 @@ calc = Calculator('stock_tickers.csv')
 # start_date = calc.get_date('2019-01-01')
 # print(calc.calculate_sharpe_ratio('GVA', start_date, '2020-01-01'))
 
-start_time = time.time()
+# start_time = time.time()
 
-with open("testing_data.csv", "w") as data_file:
-    writer = csv.writer(data_file)
-    calc.calculate_ticker_data_for_timeframe(writer,'WHG','2000-01-10', '2005-01-10')   
+# with open("testing_data.csv", "w") as data_file:
+#     writer = csv.writer(data_file)
+#     calc.calculate_ticker_data_for_timeframe(writer,'WHG','2000-01-10', '2005-01-10')   
 
-print(time.time() - start_time, "seconds to generate data")
+# print(time.time() - start_time, "seconds to generate data")
 
 # print(calc.get_ticker_starts())
