@@ -177,7 +177,7 @@ class Calculator:
 	#           and limit date (exclusive)
 	# RETURNS:  the CAGR for the stock in the time frame after the given time frame
 	def calculate_next_given_per_CAGR(self, ticker_name, start_date, num_days):
-		delta = datetime.datetime(days = num_days)
+		delta = datetime.timedelta(days = num_days)
 		increment_day = datetime.timedelta(days=1)
 		d1 = self.get_date(start_date)
 		today = datetime.date.today()
@@ -302,7 +302,7 @@ class Calculator:
 				sortino_values.append(0)
 				CAGR_values.append(0)
 			
-			date_iterator_start = self.get_date(self.month_after(self.date_to_string(date_iterator_start)))
+			date_iterator_start = date_iterator_end
 			date_iterator_end = self.get_date(self.month_after(self.date_to_string(date_iterator_end)))
 			month += 1
 
@@ -310,6 +310,8 @@ class Calculator:
 			ticker_next_year_CAGR = self.calculate_next_given_per_CAGR(ticker_name, end_date, 365)
 		except:
 			ticker_next_year_CAGR = 0
+
+		# ticker_next_year_CAGR = self.calculate_next_given_per_CAGR(ticker_name, end_date, 365)
 
 		csv_writer.writerow([ticker_name, ticker_next_year_CAGR, start_date, end_date])
 		csv_writer.writerow(sharpe_values)
