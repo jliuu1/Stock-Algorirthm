@@ -48,6 +48,7 @@ class Calculator:
 			# download data
 			data = ticker.history(period='max')
 			# create new file and write data to it
+			# create cache folder if it doesn't exist
 			# os.mkdirs('cache', ) TODO probably good idea to fix this
 			with open(filename, 'w') as cache:	
 				cache.write(data.to_csv())
