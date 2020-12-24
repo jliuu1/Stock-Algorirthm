@@ -1,4 +1,5 @@
 from calculate import *
+import time
 
 calc = Calculator('stock_tickers.csv')
 # print(calc.get_num())
@@ -29,8 +30,12 @@ calc = Calculator('stock_tickers.csv')
 # start_date = calc.get_date('2019-01-01')
 # print(calc.calculate_sharpe_ratio('GVA', start_date, '2020-01-01'))
 
+start_time = time.time()
+
 with open("practice_data.csv", "w") as data_file:
     writer = csv.writer(data_file)
     calc.calculate_ticker_data_for_timeframe(writer,'LX','2018-01-10', '2019-01-10')   
+
+print(time.time() - start_time, "seconds to generate data for", calc.get_num(), "stocks")
 
 # print(calc.get_ticker_starts())
