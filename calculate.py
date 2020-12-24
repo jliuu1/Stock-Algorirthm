@@ -253,7 +253,7 @@ class Calculator:
 		# Calculates data for all tickers
 		with open("practice_data.csv", "w") as data_file:
 			writer = csv.writer(data_file)
-			writer.writerow(['Ticker', 'Sharpe', 'Sortino', 'Current Period CAGR', 'Next Year CAGR'] )
+			writer.writerow(['Ticker', 'Sharpe', 'Sortino', 'Current Period CAGR', 'Next Year CAGR'])
 
 			for ticker_name in self.ticker_names:
 				try:
@@ -269,19 +269,27 @@ class Calculator:
 
 	# REQUIRES: 2 valid dates as strings in the format YYYY-MM-DD
 	# RETURNS:  A csv of the data for all stocks in that time frame
-	def calculate_ticker_data_for_timeframe(self, ticker_name, start_date, end_date):
+	def calculate_ticker_data_for_timeframe(self, csv_writer, ticker_name, start_date, end_date):
 
 		# Calculates data for a specific ticker
-		with open("practice_data.csv", "w") as data_file:
-			writer = csv.writer(data_file)
+		# with open("practice_data.csv", "w") as data_file:
+		# 	writer = csv.writer(data_file)
 
-			ticker_sharpe = self.calculate_sharpe_ratio(ticker_name, start_date, end_date)
-			ticker_sortino = self.calculate_sortino_ratio(ticker_name, start_date, end_date)
-			ticker_curr_CAGR = self.calculate_curr_per_CAGR(ticker_name, start_date, end_date)
-			# ticker_next_mirror_CAGR = self.calculate_next_mirror_per_CAGR(ticker_name, start_date, end_date)
-			ticker_next_year_CAGR = self.calculate_next_given_per_CAGR(ticker_name, end_date, 365)
+		# 	ticker_sharpe = self.calculate_sharpe_ratio(ticker_name, start_date, end_date)
+		# 	ticker_sortino = self.calculate_sortino_ratio(ticker_name, start_date, end_date)
+		# 	ticker_curr_CAGR = self.calculate_curr_per_CAGR(ticker_name, start_date, end_date)
+		# 	# ticker_next_mirror_CAGR = self.calculate_next_mirror_per_CAGR(ticker_name, start_date, end_date)
+		# 	ticker_next_year_CAGR = self.calculate_next_given_per_CAGR(ticker_name, end_date, 365)
 
-			writer.writerow([ticker_name, ticker_sharpe, ticker_sortino, ticker_curr_CAGR, ticker_next_year_CAGR])
+		# 	writer.writerow([ticker_name, ticker_sharpe, ticker_sortino, ticker_curr_CAGR, ticker_next_year_CAGR])
+
+		ticker_sharpe = self.calculate_sharpe_ratio(ticker_name, start_date, end_date)
+		ticker_sortino = self.calculate_sortino_ratio(ticker_name, start_date, end_date)
+		ticker_curr_CAGR = self.calculate_curr_per_CAGR(ticker_name, start_date, end_date)
+		# ticker_next_mirror_CAGR = self.calculate_next_mirror_per_CAGR(ticker_name, start_date, end_date)
+		ticker_next_year_CAGR = self.calculate_next_given_per_CAGR(ticker_name, end_date, 365)
+
+		csv_writer.writerow([ticker_name, ticker_sharpe, ticker_sortino, ticker_curr_CAGR, ticker_next_year_CAGR])
 
 
 
