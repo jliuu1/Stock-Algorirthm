@@ -31,6 +31,6 @@ calc = Calculator('stock_tickers.csv')
 
 with open("practice_data.csv", "w") as data_file:
     writer = csv.writer(data_file)
-    calc.calculate_ticker_data_for_timeframe(writer,'GVA','2019-01-01', '2020-01-01')   
+    calc.calculate_ticker_data_for_timeframe(writer,'LX','2018-01-10', '2019-01-10')   
 
 # print(calc.get_ticker_starts())
