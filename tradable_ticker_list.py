@@ -12,7 +12,7 @@ with open('stock_raw_list.csv', 'r') as stocks_file, \
 
     for row in stocks:
         if (count % stockfilter) == 0:
-            if row[2] != 'NA' and row[0] != 'Symbol':
+            if row[2] != 'NA' and row[0] != 'Symbol' and '/' not in row[0]:
                 writer.writerow([row[0]])
         count += 1
                 
