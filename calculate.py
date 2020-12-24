@@ -13,7 +13,7 @@ class Calculator:
 	def __init__(self, file_name):
 		self.ticker_names = []
 		self.ticker_data = {}
-		self.ticker_histories = {}
+		self.ticker_histories = {} # dataframe of history
 		self.ticker_starts = {}
 		self.num_stocks = 0
 
@@ -59,7 +59,7 @@ class Calculator:
 	# RETURNS:
 	def find_ticker_start(self):
 		for ticker in self.ticker_names:
-			# ticker_history = self.ticker_data[ticker].history(period='max')
+			ticker_history = self.ticker_data[ticker].history(period='max')
 			ticker_histories = self.ticker_history[ticker]
 			start_date = pd.to_datetime(ticker_history.index[0])
 			self.ticker_starts[ticker] = self.date_to_string(start_date)
