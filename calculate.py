@@ -26,22 +26,39 @@ class Calculator:
 		for ticker in ticker_list:
 			self.ticker_names.append(ticker[0])
 			ticker_object = yf.Ticker(ticker[0])
-			self.ticker_data[ticker[0]] = ticker_object
+			# self.ticker_data[ticker[0]] = ticker_object
+			self.ticker_histories[ticker[0]] = Calculator.download_history(ticker_object)
 			self.num_stocks += 1
-		if self.num_stocks % 100 == 0:
-			print('Running stock #' , self.num_stocks)
+			if self.num_stocks % 100 == 0:
+				print('Running stock #' , self.num_stocks)
 
 		self.find_ticker_start()
 
 		ticker_file.close()
 		print('Finished compiling a dict of size' , self.num_stocks)
 
+	@staticmethod
+	def download_history(ticker):
+		filename = f'cache/{ticker.ticker}.csv'
+		try:
+			# try to read
+			return pd.read_csv(filename)
+		except:
+			# download data
+			data = ticker.history(period='max')
+			# create new file and write data to it
+			# os.mkdirs('cache', ) TODO probably good idea to fix this
+			with open(filename, 'w') as cache:	
+				cache.write(data.to_csv())
+				return data
+
 	# REQUIRES: 
 	# MODIFIES: Class attribute ticker_times, filling the dict values with the first recorded data in YFinance for the stock
 	# RETURNS:
 	def find_ticker_start(self):
 		for ticker in self.ticker_names:
-			ticker_history = self.ticker_data[ticker].history(period='max')
+			# ticker_history = self.ticker_data[ticker].history(period='max')
+			ticker_history = self.ticker_history[ticker]
 			start_date = pd.to_datetime(ticker_history.index[0])
 			self.ticker_starts[ticker] = self.date_to_string(start_date)
 
@@ -295,23 +312,23 @@ class Calculator:
 		sharpe_values = []
 		sortino_values = []
 		CAGR_values = []
+		increment_date = datetime.timedelta(days=1)
 		date_iterator_start = self.get_date(start_date)
 		date_iterator_end = self.get_date(self.month_after(start_date))
 		month = 0
 
-		#NEED TO DEAL WITH CASE WHERE IF date_iterator_start + num_months == 0, dont run that trial.
-		#ALSO NEED TO DEAL WITH THE CASE IF WE HAVE PARTIAL DATA TO FILL WITH ZEROS
-
 		while month != num_months:
-			try:
-				# sharpe_values.append(self.calculate_sharpe_ratio(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
-				sortino_values.append(self.calculate_sortino_ratio(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
-				# CAGR_values.append(self.calculate_curr_per_CAGR(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
-				# ticker_next_mirror_CAGR = self.calculate_next_mirror_per_CAGR(ticker_name, date_iterator_start, date_iterator_end)
-			except:
-				sharpe_values.append(0)
-				sortino_values.append(0)
-				CAGR_values.append(0)
+			while True:
+				try:
+					# sharpe_values.append(self.calculate_sharpe_ratio(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
+					# sortino_values.append(self.calculate_sortino_ratio(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
+					CAGR_values.append(self.calculate_curr_per_CAGR(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
+					# ticker_next_mirror_CAGR = self.calculate_next_mirror_per_CAGR(ticker_name, date_iterator_start, date_iterator_end)
+					break
+				except:	
+					print(f'trying next date: {self.date_to_string(date_iterator_start)}')
+					date_iterator_start += increment_date
+					date_iterator_end += increment_date
 			
 			date_iterator_start = date_iterator_end
 			date_iterator_end = self.get_date(self.month_after(self.date_to_string(date_iterator_end)))
@@ -322,12 +339,10 @@ class Calculator:
 		except:
 			ticker_next_year_CAGR = 0
 
-		# ticker_next_year_CAGR = self.calculate_next_given_per_CAGR(ticker_name, end_date, 365)
-
 		csv_writer.writerow([ticker_name, ticker_next_year_CAGR, start_date, end_date])
 		# csv_writer.writerow(sharpe_values)
-		csv_writer.writerow(sortino_values)
-		# csv_writer.writerow(CAGR_values)
+		#csv_writer.writerow(sortino_values)
+		csv_writer.writerow(CAGR_values)
 			
 			
 

@@ -38,6 +38,6 @@ with open("testing_data.csv", "w") as data_file:
     writer = csv.writer(data_file)
     calc.calculate_ticker_data_for_timeframe(writer,'WHG','2000-01-10', '2005-01-10')   
 
-print(time.time() - start_time, "seconds to generate sortino data")
+print(time.time() - start_time, "seconds to generate data")
 
 # print(calc.get_ticker_starts())
