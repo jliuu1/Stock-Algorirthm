@@ -12,8 +12,10 @@ calc = Calculator('stock_tickers.csv')
 # print("Calculating Sharpe: ")
 # print(calc.calculate_sharpe_ratio('FB', '2019-08-14', '2020-01-03'))
 
+# start_time = time.time()
 # print("Calculating Sortino: ")
-# print(calc.calculate_sortino_ratio('FB', '2019-08-14', '2020-01-03'))
+# print(calc.calculate_sortino_ratio('DSX', '2019-08-15', '2019-09-15'))
+# print(time.time() - start_time, "seconds to generate sortino data")
 
 # print(calc.next_market_day('2020-12-20'))
 # print(calc.next_per_end('2019-08-14', '2020-01-03'))
@@ -32,10 +34,10 @@ calc = Calculator('stock_tickers.csv')
 
 start_time = time.time()
 
-with open("practice_data.csv", "w") as data_file:
+with open("testing_data.csv", "w") as data_file:
     writer = csv.writer(data_file)
-    calc.calculate_ticker_data_for_timeframe(writer,'LX','2018-01-10', '2019-01-10')   
+    calc.calculate_ticker_data_for_timeframe(writer,'WHG','2000-01-10', '2005-01-10')   
 
-print(time.time() - start_time, "seconds to generate data for", calc.get_num(), "stocks")
+print(time.time() - start_time, "seconds to generate sortino data")
 
 # print(calc.get_ticker_starts())

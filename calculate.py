@@ -97,7 +97,7 @@ class Calculator:
 	# REQUIRES: valid date string in the form YYYY-MM-DD
 	# RETURNS:  the datetime object for the next day
 	def day_after(self, date_string):
-		curr_day = self.get_date(date_string)
+		curr_day = self.get_date(self.next_market_day(date_string))
 		increment_day = datetime.timedelta(days=1)
 		next_day = curr_day + increment_day
 
@@ -140,7 +140,7 @@ class Calculator:
 
 		start_price = self.ticker_data[ticker_name].history(start=self.next_market_day(start_date), end=self.day_after(start_date))['Close'].iloc[0]
 		end_price = self.ticker_data[ticker_name].history(start=self.next_market_day(end_date), end=self.day_after(end_date))['Close'].iloc[0]
-
+		
 		return_percentage = (end_price - start_price) / (start_price) * 100.0
 
 		return return_percentage
@@ -149,6 +149,10 @@ class Calculator:
 	#           and limit date (exclusive)
 	# RETURNS:  the CAGR for the stock in the given time frame
 	def calculate_curr_per_CAGR(self, ticker_name, start_date, end_date):
+		
+		if end_date < self.ticker_starts[ticker_name]:
+			return 0
+		
 		return_percentage = float(self.calculate_return(ticker_name, start_date, end_date))
 		d0 = self.get_date(start_date)
 		d1 = self.get_date(end_date)
@@ -211,6 +215,9 @@ class Calculator:
 	# RETURNS:  the sharpe ratio of a given stock prior to the end date
 	def calculate_sharpe_ratio(self, ticker_name, start_date, end_date):
 
+		if end_date < self.ticker_starts[ticker_name]:
+			return 0
+
 		price_history = self.ticker_data[ticker_name].history(start=self.next_market_day(start_date), end=self.next_market_day(end_date))['Close']
 
 		returns = [0] * (price_history.size - 1)
@@ -233,11 +240,15 @@ class Calculator:
 	# RETURNS:  the sortino ratio of a given stock prior to the end date
 	def calculate_sortino_ratio(self, ticker_name, start_date, end_date):
 
+		if end_date < self.ticker_starts[ticker_name]:
+			return 0
+
 		price_history = self.ticker_data[ticker_name].history(start=self.next_market_day(start_date), end=self.next_market_day(end_date))['Close']
 
 		negative_count = 0
 		returns = [None] * (price_history.size - 1)
 		for i in range(price_history.size - 1):
+
 			daily_return = (price_history.iloc[i + 1] - price_history.iloc[i]) / price_history.iloc[i] * 100
 			if daily_return < 0:
 				returns[i] = daily_return
@@ -293,9 +304,9 @@ class Calculator:
 
 		while month != num_months:
 			try:
-				sharpe_values.append(self.calculate_sharpe_ratio(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
+				# sharpe_values.append(self.calculate_sharpe_ratio(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
 				sortino_values.append(self.calculate_sortino_ratio(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
-				CAGR_values.append(self.calculate_curr_per_CAGR(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
+				# CAGR_values.append(self.calculate_curr_per_CAGR(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
 				# ticker_next_mirror_CAGR = self.calculate_next_mirror_per_CAGR(ticker_name, date_iterator_start, date_iterator_end)
 			except:
 				sharpe_values.append(0)
@@ -314,9 +325,9 @@ class Calculator:
 		# ticker_next_year_CAGR = self.calculate_next_given_per_CAGR(ticker_name, end_date, 365)
 
 		csv_writer.writerow([ticker_name, ticker_next_year_CAGR, start_date, end_date])
-		csv_writer.writerow(sharpe_values)
+		# csv_writer.writerow(sharpe_values)
 		csv_writer.writerow(sortino_values)
-		csv_writer.writerow(CAGR_values)
+		# csv_writer.writerow(CAGR_values)
 			
 			
 
