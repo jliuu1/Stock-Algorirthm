@@ -283,7 +283,7 @@ class Calculator:
 
 		ticker_next_year_CAGR = self.calculate_next_given_per_CAGR(ticker_name, end_date, 365)
 
-		csv_writer.writerow([ticker_name, ticker_next_year_CAGR, start_date, end_date])
+		csv_writer.writerow(['y', ticker_name, ticker_next_year_CAGR, start_date, end_date])
 		csv_writer.writerow(sharpe_values)
 		csv_writer.writerow(sortino_values)
 		csv_writer.writerow(CAGR_values)
