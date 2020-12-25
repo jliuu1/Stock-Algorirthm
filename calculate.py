@@ -17,7 +17,7 @@ class Calculator:
 		self.ticker_starts = {}
 		self.num_stocks = 0
 
-		try:
+		try: # should be with and just fuck the error
 			ticker_file = open(file_name, 'r')
 		except:
 			print("Invalid File Name")
@@ -34,6 +34,9 @@ class Calculator:
 				print('Running stock #' , self.num_stocks)
 
 		self.find_ticker_start()
+
+		with open("cache/^TNX.csv") as datafile:
+			self.rfr = pd.read_csv(datafile)
 
 		ticker_file.close()
 		print('Finished compiling a dict of size' , self.num_stocks)
@@ -110,40 +113,11 @@ class Calculator:
 		
 		return self.date_to_string(d0)
 
-
-	# REQUIRES: valid date string in the form YYYY-MM-DD
-	# RETURNS:  the datetime object for the next day
-	def day_after(self, date_string):
-		curr_day = self.get_date(self.next_market_day(date_string))
-		increment_day = datetime.timedelta(days=1)
-		next_day = curr_day + increment_day
-
-		return self.next_market_day(self.date_to_string(next_day))
-
-	# REQUIRES: valid date string in the form YYYY-MM-DD
-	# RETURNS:  the string for the date 1 month after
-	def month_after(self, date_string):
-		date = datetime.datetime.strptime(date_string, "%Y-%m-%d")
+	# REQUIRES: valid datestring in the form YYYY-MM-DD
+	# RETURNS:  the date of the date 1 month after
+	def month_after_notstring(self, date):
 		date += datetime.timedelta(days=calendar.monthrange(date.year,date.month)[1])
-		return self.next_market_day(self.date_to_string(date))
-
-	# REQUIRES: 2 valid date strings in the form YYYY-MM-DD
-	# RETURNS:  the date string of the period of the same length after end_date
-	def next_per_end(self, start_date, end_date):
-		d0 = self.get_date(start_date)
-		d1 = self.get_date(end_date)
-		difference = d1 - d0
-		increment_day = datetime.timedelta(days=1)
-		today = datetime.date.today()
-
-		if (d1 + difference + increment_day) >= today:
-			next_date = today - increment_day
-			while (next_date.weekday() == 5 or next_date.weekday() == 6):
-				next_date -= increment_day
-		else:
-			next_date = d1 + difference
-
-		return self.next_market_day(self.date_to_string(next_date))
+		return date
 	
 	# REQUIRES: 2 valid dates as strings in the format YYYY-MM-DD
 	# RETURNS:  the number of months in that timeframe
@@ -185,18 +159,6 @@ class Calculator:
 
 		return cagr
 
-	# FUTURE FUNCTION IF NEEDED
-	# # REQUIRES: valid ticker name that was initialized in the calculator
-	# #           and limit date (exclusive)
-	# # RETURNS:  the CAGR for the stock in the time frame after the same time frame
-	# def calculate_next_mirror_per_CAGR(self, ticker_name, start_date, end_date):
-	# 	next_per_end = self.next_per_end(start_date, end_date)
-	# 	return_percentage = float(self.calculate_return(ticker_name, self.next_market_day(end_date), next_per_end))
-	# 	next_period_len = self.get_date(next_per_end) - self.get_date(end_date)
-	# 	year_frac = float(next_period_len.days / 365.25)
-	# 	next_mirror_per_cagr = ((return_percentage / 100) + 1) ** (1 / year_frac) - 1
-	# 	return next_mirror_per_cagr
-
 	# REQUIRES: valid ticker name that was initialized in the calculator
 	#           and limit date (exclusive)
 	# RETURNS:  the CAGR for the stock in the time frame after the given time frame
@@ -225,14 +187,12 @@ class Calculator:
 	# RETURNS:  the sharpe ratio of a given stock prior to the end date
 	def risk_free_rate(self, start_date, end_date):
 		risk_free_rate = 0
-		with open("cache/^TNX.csv") as datafile:
-			df = pd.read_csv(datafile)
-			after_start_date = df["Date"] >= start_date
-			before_end_date = df["Date"] <= end_date
-			between_two_dates = after_start_date & before_end_date
-			filtered_dates = df.loc[between_two_dates]
+		after_start_date = self.rfr["Date"] >= start_date
+		before_end_date = self.rfr["Date"] <= end_date
+		between_two_dates = after_start_date & before_end_date
+		filtered_dates = self.rfr.loc[between_two_dates]
 
-			risk_free_rate = filtered_dates[["Close"]].mean()
+		risk_free_rate = filtered_dates[["Close"]].mean()
 
 		return risk_free_rate
 
@@ -249,17 +209,18 @@ class Calculator:
 		after_start_date = df["Date"] >= start_date
 		before_end_date = df["Date"] <= end_date
 		between_two_dates = after_start_date & before_end_date
-		filtered_dates = df.loc[between_two_dates]
+		filtered_dates = df.loc[between_two_dates] # can prob be improved
 
 		returns = []
 		starting_row = filtered_dates.index[0]
-		for i in range(len(filtered_dates['Close']) - 1):
-			daily_return = (filtered_dates['Close'][starting_row + i + 1] - filtered_dates['Close'][starting_row + i]) / filtered_dates['Close'][starting_row + i] * 100
-			returns.append(daily_return)
+		mean = filtered_dates['Close'].mean()
+		returns = filtered_dates['Close'][::-1].diff()
+		# a, b, c, d
+		# d, c, b, a
+		# d-c, c-b, b-a
 
-		pd_returns = pd.Series(returns)
 		return_percentage = self.calculate_return(ticker_name, start_date, end_date)
-		stdev = pd_returns.std()
+		stdev = returns.std()
 		volatility = stdev * np.sqrt(len(filtered_dates))
 		rfr = self.risk_free_rate(start_date, end_date)
 
@@ -300,74 +261,31 @@ class Calculator:
 		sortino_ratio = (return_percentage - rfr) / volatility
 
 		return sortino_ratio.iloc[0]
-
-	# REQUIRES: 2 valid dates as strings in the format YYYY-MM-DD
-	# RETURNS:  A csv of the data for all stocks in that time frame
-	def calculate_all_data_for_timeframe(self, start_date, end_date):
-
-		# Calculates data for all tickers
-		with open("practice_data.csv", "w") as data_file:
-			writer = csv.writer(data_file)
-			writer.writerow(['Ticker', 'Sharpe', 'Sortino', 'Current Period CAGR', 'Next Year CAGR'])
-
-			for ticker_name in self.ticker_names:
-				try:
-					ticker_sharpe = self.calculate_sharpe_ratio(ticker_name, start_date, end_date)
-					ticker_sortino = self.calculate_sortino_ratio(ticker_name, start_date, end_date)
-					ticker_curr_CAGR = self.calculate_curr_per_CAGR(ticker_name, start_date, end_date)
-					# ticker_next_mirror_CAGR = self.calculate_next_mirror_per_CAGR(ticker_name, start_date, end_date)
-					ticker_next_year_CAGR = self.calculate_next_given_per_CAGR(ticker_name, end_date, 365)
-				except:
-					continue
-
-				writer.writerow([ticker_name, ticker_sharpe, ticker_sortino, ticker_curr_CAGR, ticker_next_year_CAGR])
 		
 	# REQUIRES: 2 valid dates as strings in the format YYYY-MM-DD
 	# RETURNS:  A csv of the data for all stocks in that time frame
 	def calculate_ticker_data_for_timeframe(self, csv_writer, ticker_name, start_date, end_date):
-
 		num_months = self.num_months(start_date, end_date)
-		# print("Months:", num_months)
 
 		sharpe_values = []
 		sortino_values = []
 		CAGR_values = []
-		increment_date = datetime.timedelta(days=1)
 		date_iterator_start = self.get_date(start_date)
-		date_iterator_end = self.get_date(self.month_after(start_date))
+		date_iterator_end = self.month_after_notstring(date_iterator_start)
 		month = 0
 
 		while month != num_months:
-			while True:
-				try:
-					sharpe_values.append(self.calculate_sharpe_ratio(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
-					sortino_values.append(self.calculate_sortino_ratio(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
-					CAGR_values.append(self.calculate_curr_per_CAGR(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
-					# ticker_next_mirror_CAGR = self.calculate_next_mirror_per_CAGR(ticker_name, date_iterator_start, date_iterator_end)
-					break
-				except:	
-					print(f'trying next date: {self.date_to_string(date_iterator_start)}')
-					date_iterator_start += increment_date
-					date_iterator_end += increment_date
-			
+			#sharpe_values.append(self.calculate_sharpe_ratio(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
+			sortino_values.append(self.calculate_sortino_ratio(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
+			#CAGR_values.append(self.calculate_curr_per_CAGR(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
 			date_iterator_start = date_iterator_end
-			date_iterator_end = self.get_date(self.month_after(self.date_to_string(date_iterator_end)))
+		 
+			   date_iterator_end = self.month_after_notstring(date_iterator_end)
 			month += 1
 
-		try:
-			ticker_next_year_CAGR = self.calculate_next_given_per_CAGR(ticker_name, end_date, 365)
-		except:
-			ticker_next_year_CAGR = 0
+		ticker_next_year_CAGR = self.calculate_next_given_per_CAGR(ticker_name, end_date, 365)
 
 		csv_writer.writerow([ticker_name, ticker_next_year_CAGR, start_date, end_date])
 		csv_writer.writerow(sharpe_values)
 		csv_writer.writerow(sortino_values)
 		csv_writer.writerow(CAGR_values)
-			
-			
-
-
-
- 
-
-
