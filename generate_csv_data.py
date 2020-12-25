@@ -14,7 +14,7 @@ month = '01'
 day = '02'                                                  # 01 is New Year's Day, market's aren't open
 one_thousand_days = datetime.timedelta(days = 1000)         
 
-with open("practice_data.csv", "w") as data_file:
+with open("testing_data.csv", "w") as data_file:
 	
     writer = csv.writer(data_file)
 
@@ -28,7 +28,7 @@ with open("practice_data.csv", "w") as data_file:
             end_date = str(year + i + 5) + "-" + month + "-" + day
 
             # no point for the data if more than 1000 entries are zeros
-            if (calc.get_date(start_date) + one_thousand_days) > calc.get_date(first_listing):              
+            if ((calc.get_date(start_date) + one_thousand_days) > first_listing):              
                 calc.calculate_ticker_data_for_timeframe(writer, ticker, start_date, end_date)
 
 
