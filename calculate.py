@@ -17,7 +17,7 @@ class Calculator:
 		self.ticker_starts = {}
 		self.num_stocks = 0
 
-		try:
+		try: # should be with and just fuck the error
 			ticker_file = open(file_name, 'r')
 		except:
 			print("Invalid File Name")
@@ -34,6 +34,9 @@ class Calculator:
 				print('Running stock #' , self.num_stocks)
 
 		self.find_ticker_start()
+
+		with open("cache/^TNX.csv") as datafile:
+			self.rfr = pd.read_csv(datafile)
 
 		ticker_file.close()
 		print('Finished compiling a dict of size' , self.num_stocks)
@@ -184,14 +187,12 @@ class Calculator:
 	# RETURNS:  the sharpe ratio of a given stock prior to the end date
 	def risk_free_rate(self, start_date, end_date):
 		risk_free_rate = 0
-		with open("cache/^TNX.csv") as datafile:
-			df = pd.read_csv(datafile)
-			after_start_date = df["Date"] >= start_date
-			before_end_date = df["Date"] <= end_date
-			between_two_dates = after_start_date & before_end_date
-			filtered_dates = df.loc[between_two_dates]
+		after_start_date = self.rfr["Date"] >= start_date
+		before_end_date = self.rfr["Date"] <= end_date
+		between_two_dates = after_start_date & before_end_date
+		filtered_dates = self.rfr.loc[between_two_dates]
 
-			risk_free_rate = filtered_dates[["Close"]].mean()
+		risk_free_rate = filtered_dates[["Close"]].mean()
 
 		return risk_free_rate
 
@@ -208,17 +209,18 @@ class Calculator:
 		after_start_date = df["Date"] >= start_date
 		before_end_date = df["Date"] <= end_date
 		between_two_dates = after_start_date & before_end_date
-		filtered_dates = df.loc[between_two_dates]
+		filtered_dates = df.loc[between_two_dates] # can prob be improved
 
 		returns = []
 		starting_row = filtered_dates.index[0]
-		for i in range(len(filtered_dates['Close']) - 1):
-			daily_return = (filtered_dates['Close'][starting_row + i + 1] - filtered_dates['Close'][starting_row + i]) / filtered_dates['Close'][starting_row + i] * 100
-			returns.append(daily_return)
+		mean = filtered_dates['Close'].mean()
+		returns = filtered_dates['Close'][::-1].diff()
+		# a, b, c, d
+		# d, c, b, a
+		# d-c, c-b, b-a
 
-		pd_returns = pd.Series(returns)
 		return_percentage = self.calculate_return(ticker_name, start_date, end_date)
-		stdev = pd_returns.std()
+		stdev = returns.std()
 		volatility = stdev * np.sqrt(len(filtered_dates))
 		rfr = self.risk_free_rate(start_date, end_date)
 
@@ -273,12 +275,21 @@ class Calculator:
 		month = 0
 
 		while month != num_months:
+<<<<<<< HEAD
 			sharpe_values.append(self.calculate_sharpe_ratio(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
 			sortino_values.append(self.calculate_sortino_ratio(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
 			CAGR_values.append(self.calculate_curr_per_CAGR(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
 			
 			date_iterator_start = date_iterator_end
 			date_iterator_end = self.month_after_notstring(date_iterator_end)
+=======
+			#sharpe_values.append(self.calculate_sharpe_ratio(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
+			sortino_values.append(self.calculate_sortino_ratio(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
+			#CAGR_values.append(self.calculate_curr_per_CAGR(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
+			date_iterator_start = date_iterator_end
+		 
+			   date_iterator_end = self.month_after_notstring(date_iterator_end)
+>>>>>>> new
 			month += 1
 
 		ticker_next_year_CAGR = self.calculate_next_given_per_CAGR(ticker_name, end_date, 365)
