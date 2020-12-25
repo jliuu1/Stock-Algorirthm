@@ -214,7 +214,12 @@ class Calculator:
 		# periods could be 1 here
 		# but when I do that pandas gives me infinite NaN
 		# so it's -1 now :)
+		# huh?
+		# print(filtered_dates['Close'].diff(periods=1)[1:])
+		# print(filtered_dates['Close'].diff(periods=-1)[:-1])
+
 		returns = (filtered_dates['Close'].diff(periods=-1)[:-1] / filtered_dates['Close']) * -100
+		print(returns)
 
 		return_percentage = self.calculate_return(ticker_name, start_date, end_date)
 		stdev = returns.std()
