@@ -211,26 +211,19 @@ class Calculator:
 		between_two_dates = after_start_date & before_end_date
 		filtered_dates = df.loc[between_two_dates] # can prob be improved
 
-		returns = []
-		starting_row = filtered_dates.index[0]
-		mean = filtered_dates['Close'].mean()
-		returns = filtered_dates['Close'][::-1].diff()
-		# a, b, c, d
-		# d, c, b, a
-		# d-c, c-b, b-a
+		# periods could be 1 here
+		# but when I do that pandas gives me infinite NaN
+		# so it's -1 now :)
+		returns = (filtered_dates['Close'].diff(periods=-1)[:-1] / filtered_dates['Close']) * -100
 
 		return_percentage = self.calculate_return(ticker_name, start_date, end_date)
 		stdev = returns.std()
-		volatility = stdev * np.sqrt(len(filtered_dates))
+		volatility = stdev * np.sqrt(len(returns))
 		rfr = self.risk_free_rate(start_date, end_date)
 
 		sharpe_ratio = (return_percentage - rfr) / volatility
-
 		return sharpe_ratio.iloc[0]
 
-	# REQUIRES: valid ticker name that was initialized in the calculator
-	#           and limit date (exclusive)
-	# RETURNS:  the sortino ratio of a given stock prior to the end date
 	def calculate_sortino_ratio(self, ticker_name, start_date, end_date):
 
 		if end_date < self.date_to_string(self.ticker_starts[ticker_name]):
@@ -241,21 +234,21 @@ class Calculator:
 		before_end_date = df["Date"] <= end_date
 		between_two_dates = after_start_date & before_end_date
 		filtered_dates = df.loc[between_two_dates]
+		
+		returns = (filtered_dates['Close'].diff(periods=-1)[:-1] / filtered_dates['Close']) * -100
+		returns = returns[returns < 0]
 
-		returns = []
-		negative_count = 0
-		starting_row = filtered_dates.index[0]
-		for i in range(len(filtered_dates['Close']) - 1):
-			daily_return = (filtered_dates['Close'][starting_row + i + 1] - filtered_dates['Close'][starting_row + i]) / filtered_dates['Close'][starting_row + i] * 100
+		#starting_row = filtered_dates.index[0]
+		#for i in range(len(filtered_dates['Close']) - 1):
+		#	daily_return = (filtered_dates['Close'][starting_row + i + 1] - filtered_dates['Close'][starting_row + i]) / filtered_dates['Close'][starting_row + i] * 100
 			
-			if daily_return < 0:
-				returns.append(daily_return)
-				negative_count += 1
+		#	if daily_return < 0:
+		#		returns.append(daily_return)
+		#		negative_count += 1
 
-		pd_returns = pd.Series(returns)
 		return_percentage = self.calculate_return(ticker_name, start_date, end_date)
-		stdev = pd_returns.std()
-		volatility = stdev * np.sqrt(negative_count)
+		stdev = returns.std()
+		volatility = stdev * np.sqrt(len(returns))
 		rfr = self.risk_free_rate(start_date, end_date)
 
 		sortino_ratio = (return_percentage - rfr) / volatility
@@ -275,21 +268,12 @@ class Calculator:
 		month = 0
 
 		while month != num_months:
-<<<<<<< HEAD
 			sharpe_values.append(self.calculate_sharpe_ratio(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
 			sortino_values.append(self.calculate_sortino_ratio(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
 			CAGR_values.append(self.calculate_curr_per_CAGR(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
 			
 			date_iterator_start = date_iterator_end
 			date_iterator_end = self.month_after_notstring(date_iterator_end)
-=======
-			#sharpe_values.append(self.calculate_sharpe_ratio(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
-			sortino_values.append(self.calculate_sortino_ratio(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
-			#CAGR_values.append(self.calculate_curr_per_CAGR(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
-			date_iterator_start = date_iterator_end
-		 
-			   date_iterator_end = self.month_after_notstring(date_iterator_end)
->>>>>>> new
 			month += 1
 
 		ticker_next_year_CAGR = self.calculate_next_given_per_CAGR(ticker_name, end_date, 365)
