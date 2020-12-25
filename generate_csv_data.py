@@ -14,7 +14,7 @@ month = '01'
 day = '02'                                                  # 01 is New Year's Day, market's aren't open
 one_thousand_days = datetime.timedelta(days = 1000)         
 
-with open("testing_data.csv", "w") as data_file:
+with open("practice.csv", "w") as data_file:
 	
     writer = csv.writer(data_file)
 
@@ -23,7 +23,7 @@ with open("testing_data.csv", "w") as data_file:
         ticker = calc.ticker_names[i]
         first_listing = calc.ticker_starts[ticker]
 
-        for i in range(2020 - year - segment):
+        for i in tqdm(range(2020 - year - segment)):
             start_date = str(year + i) + "-" + month + "-" + day
             end_date = str(year + i + 5) + "-" + month + "-" + day
 
