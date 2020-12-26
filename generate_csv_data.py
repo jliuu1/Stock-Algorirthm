@@ -14,7 +14,7 @@ month = '01'
 day = '02'                                                  # 01 is New Year's Day, market's aren't open
 one_thousand_days = datetime.timedelta(days = 1000)         
 
-with open("testing_data.csv", "w") as data_file:
+with open("practice.csv", "w") as data_file:
 	
     writer = csv.writer(data_file)
 
