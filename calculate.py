@@ -218,8 +218,13 @@ class Calculator:
 		# print(filtered_dates['Close'].diff(periods=1)[1:])
 		# print(filtered_dates['Close'].diff(periods=-1)[:-1])
 
-		returns = (filtered_dates['Close'].diff(periods=-1)[:-1] / filtered_dates['Close']) * -100
-		print(returns)
+		# print(filtered_dates['Close'].diff(periods=1)[1:])
+		# print(filtered_dates['Close'].diff(periods=1)[1:].size)
+		# print(filtered_dates['Close'][1:])
+		# print(filtered_dates['Close'][1:].size)
+
+		returns = (filtered_dates['Close'].diff(periods=1)[1:] / filtered_dates['Close'][1:]) * 100
+		# print(returns)
 
 		return_percentage = self.calculate_return(ticker_name, start_date, end_date)
 		stdev = returns.std()
@@ -240,7 +245,7 @@ class Calculator:
 		between_two_dates = after_start_date & before_end_date
 		filtered_dates = df.loc[between_two_dates]
 		
-		returns = (filtered_dates['Close'].diff(periods=-1)[:-1] / filtered_dates['Close']) * -100
+		returns = (filtered_dates['Close'].diff(periods=1)[1:] / filtered_dates['Close']) * 100
 		returns = returns[returns < 0]
 
 		#starting_row = filtered_dates.index[0]
@@ -272,7 +277,7 @@ class Calculator:
 		date_iterator_end = self.month_after_notstring(date_iterator_start)
 		month = 0
 
-		while month != num_months:
+		while month < num_months:
 			sharpe_values.append(self.calculate_sharpe_ratio(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
 			sortino_values.append(self.calculate_sortino_ratio(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
 			CAGR_values.append(self.calculate_curr_per_CAGR(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))

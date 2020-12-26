@@ -3,8 +3,8 @@ import time
 
 calc = Calculator('stock_tickers.csv')
 
-print("Calculating Sharpe: ")
-print(calc.calculate_sharpe_ratio('LX', '2019-08-14', '2020-01-03'))
+# print("Calculating Sharpe: ")
+# print(calc.calculate_sharpe_ratio('LX', '2019-08-14', '2020-01-03'))
 
 # print("Calculating Sortino: ")
 # print(calc.calculate_sortino_ratio('LX', '2019-08-14', '2020-01-03'))
