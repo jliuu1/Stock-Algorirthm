@@ -62,8 +62,11 @@ class Calculator:
 	# RETURNS:
 	def find_ticker_start(self):
 		for ticker in self.ticker_names:
-			df = self.ticker_histories[ticker]
-			self.ticker_starts[ticker] = pd.to_datetime(df.iloc[1]["Date"])
+			try:
+				df = self.ticker_histories[ticker]
+				self.ticker_starts[ticker] = pd.to_datetime(df.iloc[1]["Date"])
+			except:
+				print("Could not find", ticker)
 
 	# RETURNS:  the number of stocks that the calculator has stored
 	def get_num(self):

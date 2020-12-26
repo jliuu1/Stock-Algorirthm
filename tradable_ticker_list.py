@@ -7,12 +7,12 @@ with open('stock_raw_list.csv', 'r') as stocks_file, \
     writer = csv.writer(ticker_file)
 
     # shrinking list of stocks
-    stockfilter = 1000
+    stockfilter = 8
     count = 0
 
     for row in stocks:
         if (count % stockfilter) == 0:
-            if row[2] != 'NA' and row[0] != 'Symbol' and '/' not in row[0]:
+            if row[2] != 'NA' and row[0] != 'Symbol' and '/' not in row[0] and len(row[0]) < 5:
                 writer.writerow([row[0]])
         count += 1
                 
