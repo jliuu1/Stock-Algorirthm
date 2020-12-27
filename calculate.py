@@ -17,7 +17,7 @@ class Calculator:
 		self.ticker_starts = {}
 		self.num_stocks = 0
 
-		try: # should be with and just fuck the error
+		try: # should be with
 			ticker_file = open(file_name, 'r')
 		except:
 			print("Invalid File Name")
