@@ -29,3 +29,6 @@ calc = Calculator('stock_tickers.csv')
 # print(time.time() - start_time, "seconds to generate data")
 
 # print(calc.get_ticker_starts())
+
+print(calc.five_years_earlier('2000-01-10'))
+

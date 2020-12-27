@@ -6,7 +6,7 @@ import time
 
 start_time = time.time()
 
-calc = Calculator('stock_tickers.csv')
+calc = Calculator('stock_tickers.csv', false)
 
 year = 2000
 segment = 5

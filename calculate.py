@@ -27,8 +27,9 @@ class Calculator:
 		for ticker in ticker_list:
 			self.ticker_names.append(ticker[0])
 			ticker_object = yf.Ticker(ticker[0])
-			# self.ticker_data[ticker[0]] = ticker_object
+			
 			self.ticker_histories[ticker[0]] = Calculator.download_history(ticker_object)
+			
 			self.num_stocks += 1
 			if self.num_stocks % 100 == 0:
 				print('Running stock #' , self.num_stocks)
@@ -121,7 +122,13 @@ class Calculator:
 	def month_after_notstring(self, date):
 		date += datetime.timedelta(days=calendar.monthrange(date.year,date.month)[1])
 		return date
-	
+
+	# REQUIRES: valid datestring in the form YYYY-MM-DD
+	# RETURNS:  the string of the date 5 years before
+	def five_years_earlier(self, date_string):
+		temp = date_string.split('-')
+		return str(int(temp[0]) - 5) + "-" + temp[1] + "-" + temp[2]
+
 	# REQUIRES: 2 valid dates as strings in the format YYYY-MM-DD
 	# RETURNS:  the number of months in that timeframe
 	def num_months(self, start_date_string, end_date_string):
