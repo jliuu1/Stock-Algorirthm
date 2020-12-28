@@ -7,8 +7,8 @@ with open('stock_raw_list.csv', 'r') as stocks_file, \
     writer = csv.writer(ticker_file)
 
     # shrinking list of stocks
-    stockfilter = 1000
-    count = 0
+    stockfilter = 8
+    count = 1
 
     for row in stocks:
         if (count % stockfilter) == 0:
