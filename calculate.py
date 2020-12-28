@@ -255,7 +255,7 @@ class Calculator:
 		between_two_dates = after_start_date & before_end_date
 		filtered_dates = df.loc[between_two_dates]
 		
-		returns = (filtered_dates['Close'].diff(periods=1)[1:] / filtered_dates['Close']) * 100
+		returns = (filtered_dates['Close'].diff(periods=1)[1:] / filtered_dates['Close'][1:]) * 100
 		returns = returns[returns < 0]
 
 		#starting_row = filtered_dates.index[0]

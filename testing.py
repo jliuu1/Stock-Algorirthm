@@ -7,7 +7,7 @@ calc = Calculator('stock_tickers.csv')
 # print(calc.calculate_sharpe_ratio('LX', '2019-08-14', '2020-01-03'))
 
 # print("Calculating Sortino: ")
-# print(calc.calculate_sortino_ratio('LX', '2019-08-14', '2020-01-03'))
+print(calc.calculate_sortino_ratio('AMD', '2019-08-14', '2020-01-03'))
 
 # start_time = time.time()
 # print("Calculating Sortino: ")
@@ -28,7 +28,4 @@ calc = Calculator('stock_tickers.csv')
 
 # print(time.time() - start_time, "seconds to generate data")
 
-# print(calc.get_ticker_starts())
-
-print(calc.five_years_earlier('2000-01-10'))
 
