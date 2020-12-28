@@ -104,19 +104,6 @@ class Calculator:
 	def get_time_delta(self, num_days):
 		return datetime.timedelta(days = num_days)
 
-	# REQUIRES: valid date string in the form YYYY-MM-DD
-	# RETURNS:  the datetime object for the next market day
-	def next_market_day(self, date_string):
-		d0 = self.get_date(date_string)
-		increment_day = datetime.timedelta(days=1)
-		
-		while (d0.weekday() == 5 or d0.weekday() == 6):
-			d0 += increment_day
-
-		# ACCOUNT FOR HOLIDAYS
-		
-		return self.date_to_string(d0)
-
 	# REQUIRES: valid datestring in the form YYYY-MM-DD
 	# RETURNS:  the date of the date 1 month after
 	def month_after_notstring(self, date):
@@ -173,20 +160,12 @@ class Calculator:
 	#           and limit date (exclusive)
 	# RETURNS:  the CAGR for the stock in the time frame after the given time frame
 	def calculate_next_given_per_CAGR(self, ticker_name, start_date, num_days):
+		
 		delta = datetime.timedelta(days = num_days)
-		increment_day = datetime.timedelta(days=1)
 		d1 = self.get_date(start_date)
-		today = datetime.date.today()
+		end_date = self.date_to_string(d1 + delta)
 
-		if (d1 + delta + increment_day) >= today:
-			next_date = today - increment_day
-			while (next_date.weekday() == 5 or next_date.weekday() == 6):
-				next_date -= increment_day
-		else:
-			next_date = d1 + delta
-		end_date = self.next_market_day(self.date_to_string(next_date))
-
-		return_percentage = float(self.calculate_return(ticker_name, self.next_market_day(start_date), end_date))
+		return_percentage = float(self.calculate_return(ticker_name, start_date, end_date))
 		year_frac = float(num_days / 365.25)
 		next_given_per_cagr = ((return_percentage / 100) + 1) ** (1 / year_frac) - 1
 
