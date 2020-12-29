@@ -47,9 +47,6 @@ class Conversion:
 					self.training_data.append([X, y])
 					self.data_count += 1
 
-		print(self.training_data[0][1])
-		print(time.time() - start_time, "seconds to generate data for", self.data_count, "data_points")
-
 		print("Short: ", self.short_count)
 		print("Bad: ", self.bad_count)
 		print("Neutral: ", self.neutral_count)
@@ -57,17 +54,29 @@ class Conversion:
 		print("Long: ", self.long_count)
 
 		if shuffle is True:
-			self.shuffle()
+			np.random.shuffle(self.training_data)
 
-		#begin tensor generation
-	
+		self.tensor_data = torch.Tensor([[[float(k) for k in j] for j in i[0]] for i in self.training_data])
+		self.tensor_outputs = torch.Tensor([i[1] for i in self.training_data])
+
+		print(time.time() - start_time, "seconds to generate data for", self.data_count, "data_points")
+
 	def get_data_length(self):
 		return self.data_length
 
 	def data_total(self):
 		return self.data_count
+		
+	def get_training_data(self, VAL_PCT):
+		val_size = int(len(self.tensor_outputs) * VAL_PCT)
+		train_X = self.tensor_data[:-val_size]
+		train_y = self.tensor_outputs[:-val_size]
+		return train_X, train_y
+	
+	def get_testing_data(self, VAL_PCT):
+		val_size = int(len(self.tensor_outputs) * VAL_PCT)
+		test_X = self.tensor_data[-val_size:]
+		test_y = self.tensor_outputs[-val_size:]
+		return test_X, test_y
 
-	def shuffle(self):
-		np.random.shuffle(self.training_data)
-
-
+c = Conversion('practice.csv', True)

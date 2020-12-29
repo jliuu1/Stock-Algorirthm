@@ -13,13 +13,13 @@ class Net(nn.Module):
         self.conv2 = nn.Conv2d(64, 128, 3)
         self.conv3 = nn.Conv2d(128, 256, 3)
 
-        x = torch.randn(n, 3).view(-1, 1, n, 3)
-        x = torch.flatten(x, 1)
-        self._to_linear = x.size()[1]
+        #x = torch.randn(n, 3).view(-1, 1, n, 3)
+        #x = torch.flatten(x, 1)
+        #self._to_linear = x.size()[1]
 
         self.fc1 = nn.Linear(self._to_linear, 256)
         self.fc2 = nn.Linear(256, 128)
-        self.fc3 = nn.Linear(128, 3)
+        self.fc3 = nn.Linear(128, 5)
     
     
     def foward(self, x):
