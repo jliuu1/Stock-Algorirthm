@@ -66,7 +66,10 @@ class Conversion:
 
 	def data_total(self):
 		return self.data_count
-		
+	
+	def get_data_len(self):
+		return len(self.tensor_data)
+
 	def get_training_data(self, VAL_PCT):
 		val_size = int(len(self.tensor_outputs) * VAL_PCT)
 		train_X = self.tensor_data[:-val_size]
