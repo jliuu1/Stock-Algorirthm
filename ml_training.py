@@ -50,6 +50,7 @@ optimizer = optim.Adam(net.parameters(), lr=1e-3) #some use 1e-6
 loss_function = nn.MSELoss()
 c = Conversion('practice.csv', True)
 batch_X, batch_y = c.get_training_data(.25)
+test_X, test_y = c.get_testing_data(.25)
 
 
 BATCH_SIZE = 50 #number of stocks we run each time
@@ -64,3 +65,16 @@ for epoch in range(EPOCHS):
 		loss.backward()
 		optimizer.step()
 	print(f"Epoch: {epoch}. Loss: {loss}")
+
+correct = 0
+total = 0
+with torch.no_grad():
+    for i in range(len(test_X)):
+        real_class = torch.argmax(test_y[i])
+        net_out = net(test_X[i].view(-1, 180))
+        predicted_class = torch.argmax(net_out)
+
+        if predicted_class == real_class:
+            correct += 1
+        total += 1
+print("Accuracy: ", round(correct/total, 3))
