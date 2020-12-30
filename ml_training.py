@@ -53,7 +53,7 @@ batch_X, batch_y = c.get_training_data(.25)
 
 
 BATCH_SIZE = 50 #number of stocks we run each time
-EPOCHS = 5 # how many times we run through the training data in general
+EPOCHS = 10 # how many times we run through the training data in general
 
 for epoch in range(EPOCHS):
 	for i in range(0, c.get_data_len(), BATCH_SIZE):

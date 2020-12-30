@@ -39,8 +39,9 @@ class Conversion:
 						self.long_count += 1
 						y = np.eye(5)[4]
 
-					X = [next(data), next(data), next(data)]
-					
+					#X = [next(data), next(data), next(data)]
+					X = next(data) + next(data) + next(data)
+
 					if self.data_length is None:
 						self.data_length = len(X[1])
 
@@ -56,7 +57,9 @@ class Conversion:
 		if shuffle is True:
 			np.random.shuffle(self.training_data)
 
-		self.tensor_data = torch.Tensor([[[float(k) for k in j] for j in i[0]] for i in self.training_data])
+		self.tensor_data = torch.Tensor([[float(k) for k in i[0]] for i in self.training_data])
+		#self.tensor_data = torch.Tensor([[[float(k) for k in j] for j in i[0]] for i in self.training_data])
+		#print(self.tensor_data[0])
 		self.tensor_outputs = torch.Tensor([i[1] for i in self.training_data])
 
 		print(time.time() - start_time, "seconds to generate data for", self.data_count, "data_points")
@@ -81,3 +84,5 @@ class Conversion:
 		test_X = self.tensor_data[-val_size:]
 		test_y = self.tensor_outputs[-val_size:]
 		return test_X, test_y
+
+c = Conversion("practice.csv", True)
