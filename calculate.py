@@ -161,12 +161,12 @@ class Calculator:
 	# RETURNS:  the CAGR for the stock in the time frame after the given time frame
 	def calculate_next_given_per_CAGR(self, ticker_name, start_date, num_days):
 		
-		if end_date < self.date_to_string(self.ticker_starts[ticker_name]):
-			return 0
-			
 		delta = datetime.timedelta(days = num_days)
 		d1 = self.get_date(start_date)
 		end_date = self.date_to_string(d1 + delta)
+
+		if end_date < self.date_to_string(self.ticker_starts[ticker_name]):
+			return 0
 
 		return_percentage = float(self.calculate_return(ticker_name, start_date, end_date))
 		year_frac = float(num_days / 365.25)
