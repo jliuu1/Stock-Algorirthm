@@ -291,7 +291,7 @@ class Calculator:
 				# if float(CAGR_value) > 4096:
 				# 	print(self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end))
 
-				if any(c.isalpha() for c in sharpe_value) or any(c.isalpha() for c in sortino_value) or float(CAGR_value) > 4096.0:
+				if any(c.isalpha() for c in sharpe_value) or any(c.isalpha() for c in sortino_value):
 					sharpe_values.append(sharpe_values[-1])
 					sortino_values.append(sortino_values[-1])
 					CAGR_values.append(CAGR_values[-1])
