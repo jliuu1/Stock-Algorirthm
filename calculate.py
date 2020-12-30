@@ -262,23 +262,63 @@ class Calculator:
 	def calculate_ticker_data_for_timeframe(self, csv_writer, ticker_name, start_date, end_date):
 		num_months = self.num_months(start_date, end_date)
 
-		sharpe_values = []
-		sortino_values = []
-		CAGR_values = []
+		sharpe_values = [0]
+		sortino_values = [0]
+		CAGR_values = [0]
 		date_iterator_start = self.get_date(start_date)
 		date_iterator_end = self.month_after_notstring(date_iterator_start)
 		month = 0
 
 		while month < num_months:
-			sharpe_values.append(self.calculate_sharpe_ratio(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
-			sortino_values.append(self.calculate_sortino_ratio(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
-			CAGR_values.append(self.calculate_curr_per_CAGR(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
-			
-			date_iterator_start = date_iterator_end
-			date_iterator_end = self.month_after_notstring(date_iterator_end)
-			month += 1
+			try:
+
+				sharpe_value = str(self.calculate_sharpe_ratio(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
+				sortino_value = str(self.calculate_sortino_ratio(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
+				CAGR_value = str(self.calculate_curr_per_CAGR(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
+
+				# TESTING TO FIND WHICH DATES FAILED
+
+				# sharpe_value = str(self.calculate_sharpe_ratio(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
+				# # print(sharpe_value, type(sharpe_value))
+				# if sharpe_value == '-inf' or sharpe_value == 'inf' or sharpe_value == 'nan':
+				# 	print(self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end))
+
+				# sortino_value = str(self.calculate_sortino_ratio(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
+				# if sortino_value == '-inf' or sortino_value == 'inf' or sortino_value == 'nan':
+				# 	print(self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end))
+
+				# CAGR_value = str(self.calculate_curr_per_CAGR(ticker_name, self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end)))
+				# if float(CAGR_value) > 4096:
+				# 	print(self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end))
+
+				if any(c.isalpha() for c in sharpe_value) or any(c.isalpha() for c in sortino_value) or float(CAGR_value) > 4096.0:
+					sharpe_values.append(sharpe_values[-1])
+					sortino_values.append(sortino_values[-1])
+					CAGR_values.append(CAGR_values[-1])
+				else:
+					sharpe_values.append(float(sharpe_value))
+					sortino_values.append(float(sortino_value))
+					CAGR_values.append(float(CAGR_value))
+				
+				date_iterator_start = date_iterator_end
+				date_iterator_end = self.month_after_notstring(date_iterator_end)
+				month += 1
+			except:
+				# print(self.date_to_string(date_iterator_start), self.date_to_string(date_iterator_end))
+				sharpe_values.append(sharpe_values[-1])
+				sortino_values.append(sortino_values[-1])
+				CAGR_values.append(CAGR_values[-1])
+
+
+				date_iterator_start = date_iterator_end
+				date_iterator_end = self.month_after_notstring(date_iterator_end)
+				month += 1
 
 		ticker_next_year_CAGR = self.calculate_next_given_per_CAGR(ticker_name, end_date, 365)
+
+		del sharpe_values[0]
+		del sortino_values[0]
+		del CAGR_values[0]
 
 		csv_writer.writerow(['y', ticker_name, ticker_next_year_CAGR, start_date, end_date])
 		csv_writer.writerow(sharpe_values)
