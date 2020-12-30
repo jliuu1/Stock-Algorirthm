@@ -13,7 +13,7 @@ class Net(nn.Module):
 		self.conv2 = nn.Conv2d(64, 128, 3)
 		self.conv3 = nn.Conv2d(128, 256, 3)
 
-		x = torch.randn(60, 3).view(-1, 1, 60, 3)
+		x = torch.randn(60, 3).view(-1, 1, 3, 60)
 		self._to_linear = None
 		self.convs(x)
 
