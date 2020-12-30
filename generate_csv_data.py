@@ -28,7 +28,7 @@ with open("training_data_2.csv", "w") as data_file:
             start_date = str(year + i) + "-" + month + "-" + day
             end_date = str(year + i + 5) + "-" + month + "-" + day
 
-            # no point for the data if more than 1000 entries are zeros
+            # no point for the data if a significant proportion of entries are zeros
             if ((calc.get_date(start_date) + days_buffer) > first_listing):              
                 calc.calculate_ticker_data_for_timeframe(writer, ticker, start_date, end_date)
 
