@@ -81,5 +81,3 @@ class Conversion:
 		test_X = self.tensor_data[-val_size:]
 		test_y = self.tensor_outputs[-val_size:]
 		return test_X, test_y
-
-c = Conversion('practice.csv', True)
