@@ -46,15 +46,15 @@ print(net)
 
 #OPTIMIZATION STEP
 
-optimizer = optim.Adam(net.parameters(), lr=1e-3) #some use 1e-6
+optimizer = optim.Adam(net.parameters(), lr=1e-6) #some use 1e-6
 loss_function = nn.MSELoss()
-c = Conversion('practice.csv', True)
+c = Conversion('testing_data.csv', True)
 batch_X, batch_y = c.get_training_data(.25)
 test_X, test_y = c.get_testing_data(.25)
 
 
-BATCH_SIZE = 50 #number of stocks we run each time
-EPOCHS = 10 # how many times we run through the training data in general
+BATCH_SIZE = 16 #number of stocks we run each time
+EPOCHS = 25 # how many times we run through the training data in general
 
 for epoch in range(EPOCHS):
 	for i in range(0, c.get_data_len(), BATCH_SIZE):
@@ -68,13 +68,30 @@ for epoch in range(EPOCHS):
 
 correct = 0
 total = 0
+correct_short = 0
+correct_bad = 0
+correct_neutral = 0
+correct_good = 0
+correct_long = 0
 with torch.no_grad():
-    for i in range(len(test_X)):
-        real_class = torch.argmax(test_y[i])
-        net_out = net(test_X[i].view(-1, 180))
-        predicted_class = torch.argmax(net_out)
+	for i in range(len(test_X)):
+		real_class = torch.argmax(test_y[i])
+		net_out = net(test_X[i].view(-1, 180))
+		predicted_class = torch.argmax(net_out)
 
-        if predicted_class == real_class:
-            correct += 1
-        total += 1
+		#print(predicted_class, real_class)
+		if predicted_class == real_class:
+			correct += 1
+			# if predicted_class == torch.Tensor(0):
+			# 	correct_short += 1
+			# if predicted_class == torch.Tensor(1):
+			# 	correct_bad += 1
+			# if predicted_class == torch.Tensor(2):
+			# 	correct_neutral += 1
+			# if predicted_class == torch.Tensor(3):
+			# 	correct_good += 1
+			# if predicted_class == torch.Tensor(4):
+			# 	correct_long += 1
+		total += 1
 print("Accuracy: ", round(correct/total, 3))
+#print(correct_short , correct_bad, correct_neutral, correct_good, correct_long)
