@@ -42,19 +42,19 @@ class Net(nn.Module):
 		return F.log_softmax(x, dim=1)
 
 net = Net()
-print(net)
+# print(net)
 
 #OPTIMIZATION STEP
 
 optimizer = optim.Adam(net.parameters(), lr=1e-6) #some use 1e-6
 loss_function = nn.MSELoss()
-c = Conversion('testing_data.csv', True)
+c = Conversion('testing_data_2.csv', True)
 batch_X, batch_y = c.get_training_data(.25)
 test_X, test_y = c.get_testing_data(.25)
 
 
 BATCH_SIZE = 16 #number of stocks we run each time
-EPOCHS = 25 # how many times we run through the training data in general
+EPOCHS = 3 # how many times we run through the training data in general
 
 for epoch in range(EPOCHS):
 	for i in range(0, c.get_data_len(), BATCH_SIZE):
@@ -67,12 +67,13 @@ for epoch in range(EPOCHS):
 	print(f"Epoch: {epoch}. Loss: {loss}")
 
 correct = 0
-total = 0
 correct_short = 0
 correct_bad = 0
 correct_neutral = 0
 correct_good = 0
 correct_long = 0
+total = 0
+
 with torch.no_grad():
 	for i in range(len(test_X)):
 		real_class = torch.argmax(test_y[i])

@@ -58,7 +58,7 @@ class Conversion:
 			np.random.shuffle(self.training_data)
 
 		self.tensor_data = torch.Tensor([[float(k) for k in i[0]] for i in self.training_data])
-		self.tensor_data = self.tensor_data / 1e10
+		# self.tensor_data = self.tensor_data / 1e10
 		#self.tensor_data = torch.Tensor([[[float(k) for k in j] for j in i[0]] for i in self.training_data])
 		#print(self.tensor_data[0])
 		self.tensor_outputs = torch.Tensor([i[1] for i in self.training_data])
@@ -85,5 +85,3 @@ class Conversion:
 		test_X = self.tensor_data[-val_size:]
 		test_y = self.tensor_outputs[-val_size:]
 		return test_X, test_y
-
-c = Conversion("practice.csv", True)
