@@ -45,7 +45,7 @@ for k in tqdm(range(len(learning_rates))):
         with torch.no_grad():
             for i in range(len(test_X)):
                 real_class = torch.argmax(test_y[i])
-                net_out = net(test_X[i].view(-1, 8))
+                net_out = net(test_X[i].view(-1, 180))
                 predicted_class = torch.argmax(net_out)
 
                 if predicted_class == real_class:
