@@ -49,21 +49,26 @@ net = Net()
 optimizer = optim.Adam(net.parameters(), lr=1e-6) #some use 1e-6
 loss_function = nn.MSELoss()
 c = Conversion('testing_data_2.csv', True)
-batch_X, batch_y = c.get_training_data(.25)
+train_X, train_y = c.get_training_data(.25)
 test_X, test_y = c.get_testing_data(.25)
 
 
 BATCH_SIZE = 16 #number of stocks we run each time
-EPOCHS = 3 # how many times we run through the training data in general
+EPOCHS = 25 # how many times we run through the training data in general
 
 for epoch in range(EPOCHS):
 	for i in range(0, c.get_data_len(), BATCH_SIZE):
+
+		batch_X = train_X[i:i+BATCH_SIZE].view(-1, 180)
+		batch_y = train_y[i:i+BATCH_SIZE]
+
 		net.zero_grad()
 
 		outputs = net(batch_X)
 		loss = loss_function(outputs, batch_y)
 		loss.backward()
 		optimizer.step()
+
 	print(f"Epoch: {epoch}. Loss: {loss}")
 
 correct = 0

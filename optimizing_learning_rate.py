@@ -27,7 +27,7 @@ for k in tqdm(range(len(learning_rates))):
         for epoch in range(EPOCHS):
             for i in range(0, len(train_X), BATCH_SIZE):
             
-                batch_X = train_X[i:i+BATCH_SIZE].view(-1, 8)
+                batch_X = train_X[i:i+BATCH_SIZE].view(-1, 180)
                 batch_y = train_y[i:i+BATCH_SIZE]
 
                 net.zero_grad()
