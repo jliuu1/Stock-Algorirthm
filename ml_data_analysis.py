@@ -85,3 +85,9 @@ class Conversion:
 		test_X = self.tensor_data[-val_size:]
 		test_y = self.tensor_outputs[-val_size:]
 		return test_X, test_y
+
+# c = Conversion("practice.csv", True)
+
+# practice_training_data = c.get_training_data(.75)
+# print(practice_training_data)
+# print(type(practice_training_data))

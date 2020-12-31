@@ -53,8 +53,8 @@ train_X, train_y = c.get_training_data(.25)
 test_X, test_y = c.get_testing_data(.25)
 
 
-BATCH_SIZE = 16 #number of stocks we run each time
-EPOCHS = 25 # how many times we run through the training data in general
+BATCH_SIZE = 50 #number of stocks we run each time
+EPOCHS = 5 # how many times we run through the training data in general
 
 for epoch in range(EPOCHS):
 	for i in range(0, c.get_data_len(), BATCH_SIZE):
@@ -85,7 +85,7 @@ with torch.no_grad():
 		net_out = net(test_X[i].view(-1, 180))
 		predicted_class = torch.argmax(net_out)
 
-		#print(predicted_class, real_class)
+		# print(predicted_class, real_class)
 		if predicted_class == real_class:
 			correct += 1
 			# if predicted_class == torch.Tensor(0):
@@ -99,5 +99,6 @@ with torch.no_grad():
 			# if predicted_class == torch.Tensor(4):
 			# 	correct_long += 1
 		total += 1
+
 print("Accuracy: ", round(correct/total, 3))
 #print(correct_short , correct_bad, correct_neutral, correct_good, correct_long)
