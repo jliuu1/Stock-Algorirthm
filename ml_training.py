@@ -4,6 +4,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 from ml_data_analysis import Conversion
+from tqdm import tqdm
 
 
 class Net(nn.Module):
@@ -46,19 +47,19 @@ net = Net()
 
 #OPTIMIZATION STEP
 
-optimizer = optim.Adam(net.parameters(), lr=1e-6) #some use 1e-6
+optimizer = optim.Adam(net.parameters(), lr=1e-5) #some use 1e-6
 loss_function = nn.MSELoss()
-c = Conversion('practice.csv', True)
-train_X, train_y = c.get_training_data(0.25)
-test_X, test_y = c.get_testing_data(0.25)
+c = Conversion('testing_data.csv', True)
+PCT = .1
+train_X, train_y = c.get_training_data(PCT)
+test_X, test_y = c.get_testing_data(PCT)
 
 
-BATCH_SIZE = 1 #number of stocks we run each time
-EPOCHS = 5 # how many times we run through the training data in general
+BATCH_SIZE = 16 #number of stocks we run each time
+EPOCHS = 10 # how many times we run through the training data in general
 
 for epoch in range(EPOCHS):
-	for i in range(0, c.get_data_len(), BATCH_SIZE):
-
+	for i in range(0, len(train_X), BATCH_SIZE):
 		batch_X = train_X[i:i+BATCH_SIZE].view(-1, 180)
 		batch_y = train_y[i:i+BATCH_SIZE]
 
@@ -66,6 +67,7 @@ for epoch in range(EPOCHS):
 
 		outputs = net(batch_X)
 		loss = loss_function(outputs, batch_y)
+
 		loss.backward()
 		optimizer.step()
 

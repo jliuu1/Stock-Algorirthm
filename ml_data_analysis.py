@@ -59,7 +59,7 @@ class Conversion:
 			np.random.shuffle(self.training_data)
 
 		self.tensor_data = torch.Tensor([[float(k) for k in i[0]] for i in self.training_data])
-		#self.tensor_data = self.tensor_data / 10000
+		self.tensor_data = self.tensor_data / 10000
 		#self.tensor_data = torch.Tensor([[[float(k) for k in j] for j in i[0]] for i in self.training_data])
 		#print(self.tensor_data[0])
 		self.tensor_outputs = torch.Tensor([i[1] for i in self.training_data])
