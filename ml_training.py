@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -38,7 +39,6 @@ class Net(nn.Module):
 		x = F.relu(self.fc2(x))
 		x = F.relu(self.fc3(x))
 		x = self.fc4(x)
-
 		return F.log_softmax(x, dim=1)
 
 net = Net()
@@ -48,12 +48,12 @@ net = Net()
 
 optimizer = optim.Adam(net.parameters(), lr=1e-6) #some use 1e-6
 loss_function = nn.MSELoss()
-c = Conversion('testing_data_2.csv', True)
-train_X, train_y = c.get_training_data(.25)
-test_X, test_y = c.get_testing_data(.25)
+c = Conversion('practice.csv', True)
+train_X, train_y = c.get_training_data(0.25)
+test_X, test_y = c.get_testing_data(0.25)
 
 
-BATCH_SIZE = 50 #number of stocks we run each time
+BATCH_SIZE = 1 #number of stocks we run each time
 EPOCHS = 5 # how many times we run through the training data in general
 
 for epoch in range(EPOCHS):
@@ -70,6 +70,7 @@ for epoch in range(EPOCHS):
 		optimizer.step()
 
 	print(f"Epoch: {epoch}. Loss: {loss}")
+
 
 correct = 0
 correct_short = 0
@@ -88,17 +89,17 @@ with torch.no_grad():
 		# print(predicted_class, real_class)
 		if predicted_class == real_class:
 			correct += 1
-			# if predicted_class == torch.Tensor(0):
+			# if torch.equal(predicted_class, torch.Tensor(np.eye(5)[0])):
 			# 	correct_short += 1
-			# if predicted_class == torch.Tensor(1):
+			# if torch.equal(predicted_class, torch.Tensor(np.eye(5)[1])):
 			# 	correct_bad += 1
-			# if predicted_class == torch.Tensor(2):
+			# if torch.equal(predicted_class, torch.Tensor(np.eye(5)[2])):
 			# 	correct_neutral += 1
-			# if predicted_class == torch.Tensor(3):
+			# if torch.equal(predicted_class, torch.Tensor(np.eye(5)[3])):
 			# 	correct_good += 1
-			# if predicted_class == torch.Tensor(4):
+			# if torch.equal(predicted_class, torch.Tensor(np.eye(5)[4])):
 			# 	correct_long += 1
 		total += 1
 
 print("Accuracy: ", round(correct/total, 3))
-#print(correct_short , correct_bad, correct_neutral, correct_good, correct_long)
+print(correct_short , correct_bad, correct_neutral, correct_good, correct_long)

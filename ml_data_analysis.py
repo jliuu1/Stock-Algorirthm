@@ -23,6 +23,7 @@ class Conversion:
 			data = csv.reader(data_file)
 			for row in data:
 				if row[0] == "y":
+					stock = row[1]
 					if float(row[2]) <= -.5:
 						self.short_count += 1
 						y = np.eye(5)[0]
@@ -45,7 +46,7 @@ class Conversion:
 					if self.data_length is None:
 						self.data_length = len(X[1])
 
-					self.training_data.append([X, y])
+					self.training_data.append([X, y, stock])
 					self.data_count += 1
 
 		print("Short: ", self.short_count)
@@ -58,10 +59,11 @@ class Conversion:
 			np.random.shuffle(self.training_data)
 
 		self.tensor_data = torch.Tensor([[float(k) for k in i[0]] for i in self.training_data])
-		self.tensor_data = self.tensor_data / 1e10
+		#self.tensor_data = self.tensor_data / 10000
 		#self.tensor_data = torch.Tensor([[[float(k) for k in j] for j in i[0]] for i in self.training_data])
 		#print(self.tensor_data[0])
 		self.tensor_outputs = torch.Tensor([i[1] for i in self.training_data])
+		self.stocks = [i[2] for i in self.training_data]
 
 		print(time.time() - start_time, "seconds to generate data for", self.data_count, "data_points")
 
@@ -71,6 +73,9 @@ class Conversion:
 	def data_total(self):
 		return self.data_count
 	
+	def get_stocks(self):
+		return self.stocks
+
 	def get_data_len(self):
 		return len(self.tensor_data)
 
@@ -85,6 +90,10 @@ class Conversion:
 		test_X = self.tensor_data[-val_size:]
 		test_y = self.tensor_outputs[-val_size:]
 		return test_X, test_y
+	
+	def get_stock_testing(self, VAL_PCT):
+		val_size = int(len(self.tensor_outputs) * VAL_PCT)
+		return self.stocks[-val_size:]
 
 # c = Conversion("practice.csv", True)
 

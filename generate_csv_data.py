@@ -15,7 +15,7 @@ day = '02'                                                  # 01 is New Year's D
 buffer_per_year = 200
 days_buffer = datetime.timedelta(days = buffer_per_year * year_segment)         
 
-with open("training_data_2.csv", "w") as data_file:
+with open("training_data.csv", "w") as data_file:
 	
     writer = csv.writer(data_file)
 
@@ -29,8 +29,11 @@ with open("training_data_2.csv", "w") as data_file:
             end_date = str(year + i + 5) + "-" + month + "-" + day
 
             # no point for the data if a significant proportion of entries are zeros
-            if ((calc.get_date(start_date) + days_buffer) > first_listing):              
-                calc.calculate_ticker_data_for_timeframe(writer, ticker, start_date, end_date)
+            if ((calc.get_date(start_date) + days_buffer) > first_listing):
+                try:
+                    calc.calculate_ticker_data_for_timeframe(writer, ticker, start_date, end_date)
+                except:
+                    print(f"{ticker} between {start_date} and {end_date} failed to generate")
 
 
 print(time.time() - start_time, "seconds to generate data for", calc.get_num(), "stocks")

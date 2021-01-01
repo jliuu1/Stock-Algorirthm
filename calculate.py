@@ -154,6 +154,11 @@ class Calculator:
 
 		cagr = ((return_percentage / 100) + 1) ** (1 / year_frac) - 1
 
+		if cagr > 10000:
+			cagr = 10000
+		if cagr < -10000:
+			cagr = -10000
+			
 		return cagr
 
 	# REQUIRES: valid ticker name that was initialized in the calculator
