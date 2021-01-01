@@ -89,16 +89,16 @@ with torch.no_grad():
 		# print(predicted_class, real_class)
 		if predicted_class == real_class:
 			correct += 1
-			# if torch.equal(predicted_class, torch.Tensor(np.eye(5)[0])):
-			# 	correct_short += 1
-			# if torch.equal(predicted_class, torch.Tensor(np.eye(5)[1])):
-			# 	correct_bad += 1
-			# if torch.equal(predicted_class, torch.Tensor(np.eye(5)[2])):
-			# 	correct_neutral += 1
-			# if torch.equal(predicted_class, torch.Tensor(np.eye(5)[3])):
-			# 	correct_good += 1
-			# if torch.equal(predicted_class, torch.Tensor(np.eye(5)[4])):
-			# 	correct_long += 1
+			if torch.equal(predicted_class, torch.argmax(torch.Tensor(np.eye(5)[0]))):
+				correct_short += 1
+			if torch.equal(predicted_class, torch.argmax(torch.Tensor(np.eye(5)[1]))):
+				correct_bad += 1
+			if torch.equal(predicted_class, torch.argmax(torch.Tensor(np.eye(5)[2]))):
+				correct_neutral += 1
+			if torch.equal(predicted_class, torch.argmax(torch.Tensor(np.eye(5)[3]))):
+				correct_good += 1
+			if torch.equal(predicted_class, torch.argmax(torch.Tensor(np.eye(5)[4]))):
+				correct_long += 1
 		total += 1
 
 print("Accuracy: ", round(correct/total, 3))
