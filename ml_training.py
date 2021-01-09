@@ -50,6 +50,8 @@ net = Net()
 optimizer = optim.Adam(net.parameters(), lr=1e-5) #some use 1e-6
 loss_function = nn.MSELoss()
 c = Conversion('testing_data.csv', True)
+# c = Conversion('practice.csv', True)
+
 PCT = .1
 train_X, train_y = c.get_training_data(PCT)
 test_X, test_y = c.get_testing_data(PCT)
@@ -88,7 +90,8 @@ with torch.no_grad():
 		net_out = net(test_X[i].view(-1, 180))
 		predicted_class = torch.argmax(net_out)
 
-		# print(predicted_class, real_class)
+		print(predicted_class, real_class)
+
 		if predicted_class == real_class:
 			correct += 1
 			if torch.equal(predicted_class, torch.argmax(torch.Tensor(np.eye(5)[0]))):
